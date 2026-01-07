@@ -70,5 +70,3 @@ The application uses `wsrv.nl` as an image proxy to handle CORS and performance 
 ## Documentation
 
 For detailed information on configuration, search filters, and AI features, see the [User Guide](docs/HOWTO.md).
-- **Persistence**: IndexedDB (idb-keyval) & LocalStorage
-- **Testing**: Vitest
