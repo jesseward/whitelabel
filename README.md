@@ -5,6 +5,8 @@
 
 WhiteLabel is a client-side web application designed for music enthusiasts to create album art mosaics for mixtapes. It features a multi-provider search engine, a persistent workspace (The Crate), and AI-powered enhancement tools.
 
+![Aphex Example](docs/example-render.jpeg)
+
 ## Features
 
 - **Multi-Provider Search**: Integrated with Last.fm, Discogs, MusicBrainz, and Apple iTunes.
