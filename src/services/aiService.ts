@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useSettingsStore } from '../store/useSettingsStore';
 
-const MODEL_NAME = import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
+const MODEL_NAME = import.meta.env.VITE_GEMINI_MODEL || "gemini-3-pro-image-preview";
 
 export interface AIStyle {
   id: string;
