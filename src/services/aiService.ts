@@ -66,7 +66,20 @@ export const AIService = {
       }
     ]);
 
-    await result.response;
-    return base64Image; 
+    const response = await result.response;
+
+    if (!response.candidates || response.candidates.length === 0) {
+      throw new Error("No candidates returned from Gemini");
+    }
+
+    const firstCandidate = response.candidates[0];
+    const firstPart = firstCandidate.content.parts[0];
+
+    if (!firstPart || !firstPart.inlineData) {
+      throw new Error("No image data found in response");
+    }
+
+    const { mimeType, data } = firstPart.inlineData;
+    return `data:${mimeType};base64,${data}`;
   }
 };
