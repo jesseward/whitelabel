@@ -21,6 +21,7 @@ interface MusicBrainzSearchResponse {
 
 export class MusicBrainzProvider extends BaseProvider {
   name = 'musicbrainz' as const;
+  rateLimit = { limit: 1, interval: 1000 };
   protected baseUrl = 'https://musicbrainz.org/ws/2/release/';
 
   async search(params: SearchParams, page = 1): Promise<SearchResult> {

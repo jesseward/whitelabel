@@ -4,26 +4,26 @@ import { LastFmProvider } from './lastfmProvider';
 import { DiscogsProvider } from './discogsProvider';
 import { MusicBrainzProvider } from './musicbrainzProvider';
 import { ITunesProvider } from './itunesProvider';
+import { SEARCH_CONFIG } from '../constants/searchConfig';
 
-const discogsThrottle = pThrottle({ limit: 1, interval: 1000 });
-const lastfmThrottle = pThrottle({ limit: 5, interval: 1000 });
-const musicbrainzThrottle = pThrottle({ limit: 1, interval: 1000 });
-const itunesThrottle = pThrottle({ limit: 5, interval: 1000 });
-
-const providers: { provider: SearchProvider; throttle: ReturnType<typeof pThrottle> }[] = [
-  { provider: new LastFmProvider(), throttle: lastfmThrottle },
-  { provider: new DiscogsProvider(), throttle: discogsThrottle },
-  { provider: new MusicBrainzProvider(), throttle: musicbrainzThrottle },
-  { provider: new ITunesProvider(), throttle: itunesThrottle }
+const providerInstances = [
+  new LastFmProvider(),
+  new DiscogsProvider(),
+  new MusicBrainzProvider(),
+  new ITunesProvider()
 ];
+
+const providers: { provider: SearchProvider; throttle: ReturnType<typeof pThrottle> }[] = providerInstances.map(provider => ({
+  provider,
+  throttle: pThrottle(provider.rateLimit)
+}));
 
 export const SearchService = {
   parseQuery(rawQuery: string): SearchParams {
     const params: SearchParams = { query: rawQuery };
     
-    // Improved regex to handle quoted strings and non-greedy matches
-    const artistMatch = rawQuery.match(/artist:\s*(?:"([^"]+)"|'([^']+)'|(\S+))/i);
-    const albumMatch = rawQuery.match(/album:\s*(?:"([^"]+)"|'([^']+)'|(\S+))/i);
+    const artistMatch = rawQuery.match(SEARCH_CONFIG.REGEX.ARTIST);
+    const albumMatch = rawQuery.match(SEARCH_CONFIG.REGEX.ALBUM);
 
     if (artistMatch) {
       params.artist = (artistMatch[1] || artistMatch[2] || artistMatch[3]).trim();
@@ -87,13 +87,7 @@ export const SearchService = {
         if (!isRelevant) return false;
       }
 
-      const placeholders = [
-        'default_album_artwork',
-        'no-cover',
-        'spacer.gif',
-        'placeholder'
-      ];
-      return !placeholders.some(p => album.url.toLowerCase().includes(p));
+      return !SEARCH_CONFIG.PLACEHOLDERS.some(p => album.url.toLowerCase().includes(p));
     });
 
     const seen = new Set<string>();

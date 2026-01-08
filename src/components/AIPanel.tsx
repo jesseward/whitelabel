@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { AI_STYLES, AIService, type AIStyle } from '../services/aiService';
 
 interface AIPanelProps {
@@ -11,6 +12,9 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
   const [selectedStyle, setSelectedStyle] = useState<AIStyle | null>(null);
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { apiKeys } = useSettingsStore();
+
+  const hasKey = (apiKeys.gemini && apiKeys.gemini.length > 0) || import.meta.env.VITE_GEMINI_API_KEY;
 
   const handleEnhance = async () => {
     if (!selectedStyle) return;
@@ -84,9 +88,10 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
 
       <button
         onClick={handleEnhance}
-        disabled={!selectedStyle || isProcessing}
+        disabled={!selectedStyle || isProcessing || !hasKey}
+        title={!hasKey ? 'Gemini API Key required. Configure in Settings.' : ''}
         className={`w-full py-4 font-black rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] ${
-          !selectedStyle || isProcessing
+          !selectedStyle || isProcessing || !hasKey
             ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
             : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-purple-500/20'
         }`}
@@ -105,6 +110,12 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
           </>
         )}
       </button>
+      
+      {!hasKey && (
+        <p className="text-[10px] text-center text-red-500 font-bold">
+          API Key Missing
+        </p>
+      )}
       
       <p className="text-[9px] text-center text-gray-400 dark:text-gray-600 uppercase font-black tracking-widest">
         Powered by Gemini Nano Banana

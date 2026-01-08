@@ -17,6 +17,7 @@ interface ITunesSearchResponse {
 
 export class ITunesProvider extends BaseProvider {
   name = 'itunes' as const;
+  rateLimit = { limit: 5, interval: 1000 };
   protected baseUrl = 'https://itunes.apple.com/search';
 
   async search(params: SearchParams, page = 1): Promise<SearchResult> {

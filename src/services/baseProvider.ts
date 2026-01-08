@@ -5,6 +5,7 @@ import type { SearchProvider, SearchParams, SearchResult, Provider } from '../ty
  */
 export abstract class BaseProvider implements SearchProvider {
   abstract name: Provider;
+  abstract rateLimit: { limit: number; interval: number };
   protected abstract baseUrl: string;
 
   /**

@@ -59,24 +59,42 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 Toggle which services you want to search for album art.
               </p>
               
-              {Object.entries(enabledProviders).map(([key, enabled]) => (
-                <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-                  <div className="flex items-center gap-3">
-                    <span className="capitalize font-medium dark:text-gray-200">
-                      {PROVIDERS[key as Provider]?.name || key}
-                    </span>
+              {Object.entries(enabledProviders).map(([key, enabled]) => {
+                const provider = PROVIDERS[key as Provider];
+                const needsKey = provider?.requiresKey;
+                // @ts-expect-error - dynamic key access
+                const hasKey = !needsKey || (apiKeys[key] && apiKeys[key].length > 0) || (import.meta.env[`VITE_${key.toUpperCase()}_API_KEY`] || import.meta.env[`VITE_${key.toUpperCase()}_TOKEN`]);
+                const isDisabled = needsKey && !hasKey;
+
+                return (
+                  <div key={key} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                    isDisabled 
+                      ? 'bg-gray-100 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800 opacity-75' 
+                      : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <span className="capitalize font-medium dark:text-gray-200">
+                        {provider?.name || key}
+                      </span>
+                      {isDisabled && (
+                        <span className="text-[10px] font-bold text-red-500 bg-red-100 dark:bg-red-500/20 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-900">
+                          Key Required
+                        </span>
+                      )}
+                    </div>
+                    <label className={`relative inline-flex items-center ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer"
+                        checked={enabled && !isDisabled}
+                        disabled={isDisabled}
+                        onChange={() => toggleProvider(key as Provider)}
+                      />
+                      <div className={`w-11 h-6 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 ${isDisabled ? 'bg-gray-200 dark:bg-gray-800' : 'bg-gray-200'}`}></div>
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="sr-only peer"
-                      checked={enabled}
-                      onChange={() => toggleProvider(key as Provider)}
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -92,7 +110,7 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 </label>
                 <input
                   type="password"
-                  value={apiKeys.lastfm}
+                  value={apiKeys.lastfm || import.meta.env.VITE_LASTFM_API_KEY || ''}
                   onChange={(e) => setApiKey('lastfm', e.target.value)}
                   placeholder="Enter your Last.fm API Key"
                   className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
@@ -108,7 +126,7 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 </label>
                 <input
                   type="password"
-                  value={apiKeys.discogs}
+                  value={apiKeys.discogs || import.meta.env.VITE_DISCOGS_TOKEN || ''}
                   onChange={(e) => setApiKey('discogs', e.target.value)}
                   placeholder="Enter your Discogs Token"
                   className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
@@ -124,7 +142,7 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 </label>
                 <input
                   type="password"
-                  value={apiKeys.gemini}
+                  value={apiKeys.gemini || import.meta.env.VITE_GEMINI_API_KEY || ''}
                   onChange={(e) => setApiKey('gemini', e.target.value)}
                   placeholder="Enter your Gemini API Key"
                   className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"

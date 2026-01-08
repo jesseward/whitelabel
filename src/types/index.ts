@@ -28,4 +28,8 @@ export interface SearchParams {
 export interface SearchProvider {
   name: Provider;
   search(params: SearchParams, page?: number): Promise<SearchResult>;
+  rateLimit: {
+    limit: number;
+    interval: number;
+  };
 }

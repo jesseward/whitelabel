@@ -26,6 +26,7 @@ interface LastFmSearchResponse {
 
 export class LastFmProvider extends BaseProvider {
   name = 'lastfm' as const;
+  rateLimit = { limit: 5, interval: 1000 };
   protected baseUrl = 'https://ws.audioscrobbler.com/2.0/';
 
   async search(params: SearchParams, page = 1): Promise<SearchResult> {

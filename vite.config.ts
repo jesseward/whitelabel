@@ -14,4 +14,15 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-ui': ['framer-motion', '@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          'vendor-konva': ['konva', 'react-konva', 'use-image'],
+          'vendor-utils': ['piexifjs', 'p-throttle', 'idb-keyval', 'zustand']
+        }
+      }
+    }
+  }
 })

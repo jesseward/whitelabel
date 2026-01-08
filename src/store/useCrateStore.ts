@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { get, set as idbSet } from 'idb-keyval';
 import type { AlbumArt } from '../types';
 import { getProxiedUrl } from '../utils/imageProxy';
+import { CrateStorageService } from '../services/crateStorageService';
 
 interface CrateState {
   selectedAlbums: AlbumArt[];
@@ -14,39 +14,39 @@ interface CrateState {
   hydrate: () => Promise<void>;
 }
 
-const STORAGE_KEY = 'whitelabel-crate-v1';
+const fetchImageBlob = async (url: string): Promise<string | null> => {
+  try {
+    const res = await fetch(getProxiedUrl(url, 'medium'));
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.warn(`Failed to cache image for ${url}:`, error);
+    return null;
+  }
+};
 
 export const useCrateStore = create<CrateState>((set, getStore) => ({
   selectedAlbums: [],
   isHydrated: false,
 
-  shuffleAlbums: async () => {
-    const { selectedAlbums } = getStore();
-    const shuffled = [...selectedAlbums].sort(() => Math.random() - 0.5);
-    set({ selectedAlbums: shuffled });
-    await idbSet(STORAGE_KEY, shuffled.map(({ localUrl: _localUrl, ...rest }) => { void _localUrl; return rest; }));
-  },
-
   hydrate: async () => {
     try {
-      const saved = await get<AlbumArt[]>(STORAGE_KEY);
-      if (saved) {
-        const albumsWithNewUrls = await Promise.all(
-          saved.map(async (album) => {
-            try {
-              const res = await fetch(getProxiedUrl(album.url, 'medium'));
-              const blob = await res.blob();
-              return { ...album, localUrl: URL.createObjectURL(blob) };
-            } catch (error) {
-              console.warn(`Failed to re-hydrate image for ${album.album}:`, error);
-              return album;
-            }
-          })
-        );
-        set({ selectedAlbums: albumsWithNewUrls, isHydrated: true });
-      } else {
-        set({ isHydrated: true });
-      }
+      const savedAlbums = await CrateStorageService.load();
+      
+      // 1. Set state immediately with saved data (showing placeholders/remote URLs)
+      set({ selectedAlbums: savedAlbums, isHydrated: true });
+
+      // 2. Background hydrate blobs for better performance
+      const albumsWithBlobs = await Promise.all(
+        savedAlbums.map(async (album) => {
+          const localUrl = await fetchImageBlob(album.url);
+          return localUrl ? { ...album, localUrl } : album;
+        })
+      );
+      
+      // 3. Update state with blobs
+      set({ selectedAlbums: albumsWithBlobs });
+      
     } catch (error) {
       console.error('Hydration failed:', error);
       set({ isHydrated: true });
@@ -57,25 +57,25 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
     const { selectedAlbums } = getStore();
     if (selectedAlbums.find((a) => a.id === album.id)) return;
 
-    try {
-      const response = await fetch(getProxiedUrl(album.url, 'medium'));
-      const blob = await response.blob();
-      const localUrl = URL.createObjectURL(blob);
+    // 1. Optimistic Update: Add immediately
+    const newAlbums = [...selectedAlbums, album];
+    set({ selectedAlbums: newAlbums });
+    
+    // 2. Persist to DB (async, doesn't block UI)
+    CrateStorageService.save(newAlbums).catch(console.error);
 
-      const albumWithLocalUrl = { ...album, localUrl };
-      const newAlbums = [...selectedAlbums, albumWithLocalUrl];
-      set({ selectedAlbums: newAlbums });
-      
-      await idbSet(STORAGE_KEY, newAlbums.map(({ localUrl: _localUrl, ...rest }) => { void _localUrl; return rest; }));
-    } catch (error) {
-      console.error('Failed to process album image through proxy:', error);
-      const newAlbums = [...selectedAlbums, album];
-      set({ selectedAlbums: newAlbums });
-      await idbSet(STORAGE_KEY, newAlbums.map(({ localUrl: _localUrl, ...rest }) => { void _localUrl; return rest; }));
+    // 3. Background: Fetch Blob for performance
+    const localUrl = await fetchImageBlob(album.url);
+    if (localUrl) {
+      set((state) => ({
+        selectedAlbums: state.selectedAlbums.map((a) => 
+          a.id === album.id ? { ...a, localUrl } : a
+        )
+      }));
     }
   },
 
-  removeAlbum: async (albumId) => {
+  removeAlbum: (albumId) => {
     const { selectedAlbums } = getStore();
     const albumToRemove = selectedAlbums.find((a) => a.id === albumId);
     
@@ -85,25 +85,32 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
 
     const newAlbums = selectedAlbums.filter((a) => a.id !== albumId);
     set({ selectedAlbums: newAlbums });
-    await idbSet(STORAGE_KEY, newAlbums.map(({ localUrl: _localUrl, ...rest }) => { void _localUrl; return rest; }));
+    CrateStorageService.save(newAlbums).catch(console.error);
   },
 
-  reorderAlbums: async (startIndex, endIndex) => {
+  reorderAlbums: (startIndex, endIndex) => {
     const { selectedAlbums } = getStore();
     const result = Array.from(selectedAlbums);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
     
     set({ selectedAlbums: result });
-    await idbSet(STORAGE_KEY, result.map(({ localUrl: _localUrl, ...rest }) => { void _localUrl; return rest; }));
+    CrateStorageService.save(result).catch(console.error);
   },
 
-  clearCrate: async () => {
+  shuffleAlbums: () => {
+    const { selectedAlbums } = getStore();
+    const shuffled = [...selectedAlbums].sort(() => Math.random() - 0.5);
+    set({ selectedAlbums: shuffled });
+    CrateStorageService.save(shuffled).catch(console.error);
+  },
+
+  clearCrate: () => {
     const { selectedAlbums } = getStore();
     selectedAlbums.forEach((a) => {
       if (a.localUrl) URL.revokeObjectURL(a.localUrl);
     });
     set({ selectedAlbums: [] });
-    await idbSet(STORAGE_KEY, []);
+    CrateStorageService.save([]).catch(console.error);
   },
 }));

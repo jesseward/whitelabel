@@ -1,48 +1,16 @@
 import React, { useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { PROVIDER_LIST } from '../constants/providers';
-import type { Provider } from '../types';
+import { ProviderIcon } from './ProviderIcon';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
 }
 
-const ProviderIcon = ({ provider }: { provider: Provider }) => {
-  switch (provider) {
-    case 'lastfm':
-      return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.4 17.2s-1.8 1-3.4 1c-2.4 0-3.6-1.4-3.6-3.8v-5.6h2.2v5.4c0 1.2.4 1.8 1.4 1.8 1 0 1.8-.4 1.8-.4l1.6 1.6zM7.4 8.6h2.2v8.4H7.4V8.6z"/>
-        </svg>
-      );
-    case 'discogs':
-      return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 18c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6zm0-10c-2.209 0-4 1.791-4 4s1.791 4 4 4 4-1.791 4-4-1.791-4-4-4z"/>
-        </svg>
-      );
-    case 'musicbrainz':
-      return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5 16h-2v-6h-2v6H9v-6H7v6H5V8h2v1h2V8h2v1h2V8h2v8z"/>
-        </svg>
-      );
-    case 'itunes':
-      return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12z"/>
-          <path d="M10.854 8.675c.29-.408.875-.68 1.637-.68 1.488 0 2.213 1.137 2.213 2.658v3.167a3.076 3.076 0 0 0-2.42-1.166c-1.895 0-3.238 1.446-3.238 3.329 0 1.775 1.258 3.12 3.1 3.12 1.93.001 3.163-1.42 3.163-3.645V10.27c0-1.725-.97-3.412-3.12-3.412-1.284 0-2.125.6-2.125.6l.79 1.217z" fill="#fff"/>
-        </svg>
-      );
-    default:
-      return null;
-  }
-};
-
 export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [query, setQuery] = useState('');
   const [showTips, setShowTips] = useState(false);
-  const { enabledProviders, toggleProvider } = useSettingsStore();
+  const { enabledProviders, toggleProvider, apiKeys } = useSettingsStore();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,22 +40,38 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
       </form>
       
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mr-2">Providers:</span>
-          {providers.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => toggleProvider(p.id)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
-                enabledProviders[p.id]
-                  ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400'
-                  : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600'
-              }`}
-            >
-              <ProviderIcon provider={p.id} />
-              <span className="text-xs font-bold">{p.name}</span>
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mr-2 w-full md:w-auto">Providers:</span>
+          {providers.map((p) => {
+            const needsKey = p.requiresKey;
+            // @ts-expect-error - dynamic key access
+            const hasKey = !needsKey || (apiKeys[p.id] && apiKeys[p.id].length > 0) || (import.meta.env[`VITE_${p.id.toUpperCase()}_API_KEY`] || import.meta.env[`VITE_${p.id.toUpperCase()}_TOKEN`]);
+            const isDisabled = needsKey && !hasKey;
+
+            return (
+              <button
+                key={p.id}
+                onClick={() => !isDisabled && toggleProvider(p.id)}
+                disabled={isDisabled}
+                title={isDisabled ? `${p.name} requires an API Key. Configure it in Settings.` : ''}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+                  isDisabled 
+                    ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400' 
+                    : enabledProviders[p.id]
+                      ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400'
+                      : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 hover:border-gray-300 dark:hover:border-gray-700'
+                }`}
+              >
+                <ProviderIcon provider={p.id} />
+                <span className="text-xs font-bold">{p.name}</span>
+                {isDisabled && (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-red-500">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-4">

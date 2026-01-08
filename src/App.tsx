@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SearchBar } from "./components/SearchBar";
 import { AlbumGrid } from "./components/AlbumGrid";
 import { Crate } from "./components/Crate";
-import { MosaicCanvas } from "./components/MosaicCanvas";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { SearchService } from "./services/searchService";
 import { useCrateStore } from "./store/useCrateStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useSettingsStore } from "./store/useSettingsStore";
+
+const MosaicCanvas = lazy(() => import("./components/MosaicCanvas").then(module => ({ default: module.MosaicCanvas })));
 
 type View = "search" | "generate";
 
@@ -56,16 +57,24 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white p-4 md:p-8 selection:bg-blue-500/30 transition-colors duration-300">
-      <header className="max-w-7xl mx-auto mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1
-            className="text-5xl font-black tracking-tighter mb-2 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent cursor-pointer"
+      <header className="max-w-7xl mx-auto mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-4 border-black dark:border-white pb-6">
+        <div className="flex flex-col gap-2">
+          <div 
+            className="flex items-center gap-3 cursor-pointer group w-fit"
             onClick={() => setView("search")}
           >
-            WHITELABEL
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
-            Create album art mosaics for your mixtapes.
+            <div className="relative w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite] group-hover:animate-[spin_2s_linear_infinite]">
+              <div className="w-6 h-6 bg-white dark:bg-black rounded-full absolute" />
+              <div className="w-14 h-14 border border-white/20 dark:border-black/20 rounded-full absolute" />
+              <div className="w-10 h-10 border border-white/20 dark:border-black/20 rounded-full absolute" />
+            </div>
+            
+            <h1 className="text-7xl font-['Anton'] tracking-wide uppercase bg-black text-white dark:bg-white dark:text-black px-4 py-1 rotate-[-2deg] group-hover:rotate-0 transition-transform duration-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
+              WHITELABEL
+            </h1>
+          </div>
+          <p className="font-['JetBrains_Mono'] text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-2 pl-2 border-l-2 border-red-500">
+            // CRATE_DIGGER_TOOLKIT_V1.0
           </p>
         </div>
 
@@ -180,7 +189,13 @@ function App() {
             <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
               Preview Your Artwork
             </h2>
-            <MosaicCanvas albums={selectedAlbums} />
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            }>
+              <MosaicCanvas albums={selectedAlbums} />
+            </Suspense>
           </div>
         )}
       </main>

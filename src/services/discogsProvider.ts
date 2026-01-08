@@ -17,6 +17,7 @@ interface DiscogsSearchResponse {
 
 export class DiscogsProvider extends BaseProvider {
   name = 'discogs' as const;
+  rateLimit = { limit: 1, interval: 1000 };
   protected baseUrl = 'https://api.discogs.com/database/search';
 
   async search(params: SearchParams, page = 1): Promise<SearchResult> {
