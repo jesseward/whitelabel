@@ -1,5 +1,8 @@
 # WhiteLabel
 
+> [!TIP]
+> This can be used at https://www.jesseward.com/whitelabel . If you wish to use Discogs or LastFM API you will need to supply your own keys. This is a static page hosted on GitHub pages. Keys are stored in your browser session only.
+
 WhiteLabel is a client-side web application designed for music enthusiasts to create album art mosaics for mixtapes. It features a multi-provider search engine, a persistent workspace (The Crate), and AI-powered enhancement tools.
 
 ## Features
