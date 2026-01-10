@@ -2,6 +2,7 @@ import type { AlbumArt, SearchResult, SearchParams } from '../types';
 import { BaseProvider } from './baseProvider';
 
 const CAA_URL = 'https://coverartarchive.org/release/';
+const SCORE_THRESHOLD = 60;
 
 interface MusicBrainzArtistCredit {
   name: string;
@@ -47,7 +48,7 @@ export class MusicBrainzProvider extends BaseProvider {
 
     const data = await this.fetchJson<MusicBrainzSearchResponse>(`${this.baseUrl}?${queryParams.toString()}`);
     
-    const filteredReleases = data.releases.filter((r) => parseInt(r.score, 10) > 60);
+    const filteredReleases = data.releases.filter((r) => parseInt(r.score, 10) > SCORE_THRESHOLD);
 
     const albums = filteredReleases.map((release): AlbumArt => ({
       id: `${this.name}-${release.id}`,

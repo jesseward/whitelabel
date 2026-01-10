@@ -6,8 +6,6 @@ interface ITunesResult {
   artistName: string;
   collectionName: string;
   artworkUrl100: string;
-  artworkUrl60?: string;
-  collectionViewUrl: string;
 }
 
 interface ITunesSearchResponse {

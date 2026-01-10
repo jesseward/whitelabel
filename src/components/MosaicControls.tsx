@@ -36,9 +36,7 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-      <h3 className="text-xl font-black border-b border-gray-100 dark:border-gray-800 pb-4 mb-6">Canvas Settings</h3>
-      
+    <div className="p-6">
       <div className="space-y-6">
         <div className="space-y-2">
           <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex justify-between">

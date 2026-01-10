@@ -27,6 +27,7 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
   const [gap, setGap] = useState(initialGap);
   const [padding, setPadding] = useState(initialPadding);
   const [bgColor, setBgColor] = useState(initialBgColor);
+  const [activeTab, setActiveTab] = useState<'settings' | 'ai'>('settings');
   
   // AI Enhanced Image State
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
@@ -90,27 +91,52 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
       </div>
 
       <div className="w-full lg:w-80 flex flex-col gap-6">
-        <MosaicControls
-          bgColor={bgColor}
-          setBgColor={setBgColor}
-          columns={columns}
-          setColumns={setColumns}
-          gap={gap}
-          setGap={setGap}
-          padding={padding}
-          setPadding={setPadding}
-          format={format}
-          setFormat={setFormat}
-          onExport={handleExport}
-          disabled={!!enhancedImage}
-        />
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="flex border-b border-gray-100 dark:border-gray-800">
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex-1 py-4 text-xs font-black tracking-widest uppercase transition-colors ${
+                activeTab === 'settings' 
+                  ? 'bg-gray-50 dark:bg-gray-800/50 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' 
+                  : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+              }`}
+            >
+              Canvas Settings
+            </button>
+            <button
+              onClick={() => setActiveTab('ai')}
+              className={`flex-1 py-4 text-xs font-black tracking-widest uppercase transition-colors ${
+                activeTab === 'ai' 
+                  ? 'bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 border-b-2 border-purple-500' 
+                  : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+              }`}
+            >
+              AI Lab
+            </button>
+          </div>
 
-        {!enhancedImage && (
-          <AIPanel 
-            onGetImageSource={getCanvasBase64} 
-            onEnhanced={(newImg: string) => setEnhancedImage(newImg)} 
-          />
-        )}
+          {activeTab === 'settings' ? (
+            <MosaicControls
+              bgColor={bgColor}
+              setBgColor={setBgColor}
+              columns={columns}
+              setColumns={setColumns}
+              gap={gap}
+              setGap={setGap}
+              padding={padding}
+              setPadding={setPadding}
+              format={format}
+              setFormat={setFormat}
+              onExport={handleExport}
+              disabled={!!enhancedImage}
+            />
+          ) : (
+            <AIPanel 
+              onGetImageSource={getCanvasBase64} 
+              onEnhanced={(newImg: string) => setEnhancedImage(newImg)} 
+            />
+          )}
+        </div>
       </div>
     </div>
   );

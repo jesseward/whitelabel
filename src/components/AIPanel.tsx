@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
-import { AI_STYLES, AIService, type AIStyle } from '../services/aiService';
+import { AI_STYLES, AIService, type AIStyle, FONT_OPTIONS, type FontOption } from '../services/aiService';
 
 interface AIPanelProps {
   onGetImageSource: () => string;
@@ -10,6 +10,7 @@ interface AIPanelProps {
 export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<AIStyle | null>(null);
+  const [selectedFontStyle, setSelectedFontStyle] = useState<FontOption | null>(null);
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const { apiKeys } = useSettingsStore();
@@ -24,7 +25,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
     
     try {
       const imageSource = onGetImageSource();
-      const result = await AIService.enhanceMosaic(imageSource, selectedStyle, title);
+      const result = await AIService.enhanceMosaic(imageSource, selectedStyle, title, selectedFontStyle || undefined);
       onEnhanced(result);
     } catch (err) {
       setError("AI Enhancement failed. Check your API key or connection.");
@@ -35,7 +36,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
   };
 
   return (
-    <div className="w-full lg:w-80 space-y-6 bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 h-fit shadow-sm mt-8 lg:mt-0">
+    <div className="p-6 space-y-6">
       <div className="flex items-center gap-2 mb-2">
         <div className="bg-purple-500 p-1.5 rounded-lg text-white">
           <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
@@ -78,6 +79,37 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
             ))}
           </div>
         </div>
+
+        {title && (
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+              Font Stylist (Optional)
+            </label>
+            <div className="space-y-2">
+              {FONT_OPTIONS.map((font) => (
+                <button
+                  key={font.id}
+                  onClick={() => setSelectedFontStyle(selectedFontStyle?.id === font.id ? null : font)}
+                  className={`w-full p-4 rounded-xl border text-left transition-all ${
+                    selectedFontStyle?.id === font.id
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10'
+                      : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className={`text-sm font-bold ${selectedFontStyle?.id === font.id ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                      {font.name}
+                    </p>
+                    {selectedFontStyle?.id === font.id && (
+                      <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full font-bold">SELECTED</span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{font.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (

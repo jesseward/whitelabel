@@ -69,7 +69,7 @@ function App() {
               <div className="w-10 h-10 border border-white/20 dark:border-black/20 rounded-full absolute" />
             </div>
             
-            <h1 className="text-7xl font-['Anton'] tracking-wide uppercase bg-black text-white dark:bg-white dark:text-black px-4 py-1 rotate-[-2deg] group-hover:rotate-0 transition-transform duration-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-['Anton'] tracking-wide uppercase bg-black text-white dark:bg-white dark:text-black px-4 py-1 rotate-[-2deg] group-hover:rotate-0 transition-transform duration-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]">
               WHITELABEL
             </h1>
           </div>
