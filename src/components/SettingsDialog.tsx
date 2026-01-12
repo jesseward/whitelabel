@@ -74,10 +74,10 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
               {Object.entries(enabledProviders).map(([key, enabled]) => {
                 const provider = PROVIDERS[key as Provider];
                 const needsKey = provider?.requiresKey;
-                // @ts-expect-error - dynamic key access
+                const apiKeysKey = key as keyof typeof apiKeys;
                 const hasKey =
                   !needsKey ||
-                  (apiKeys[key] && apiKeys[key].length > 0) ||
+                  (apiKeys[apiKeysKey] && apiKeys[apiKeysKey].length > 0) ||
                   import.meta.env[`VITE_${key.toUpperCase()}_API_KEY`] ||
                   import.meta.env[`VITE_${key.toUpperCase()}_TOKEN`];
                 const isDisabled = needsKey && !hasKey;

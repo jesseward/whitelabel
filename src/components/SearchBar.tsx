@@ -46,10 +46,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           </span>
           {providers.map((p) => {
             const needsKey = p.requiresKey;
-            // @ts-expect-error - dynamic key access
+            const apiKey =
+              p.id in apiKeys ? apiKeys[p.id as keyof typeof apiKeys] : "";
             const hasKey =
               !needsKey ||
-              (apiKeys[p.id] && apiKeys[p.id].length > 0) ||
+              (apiKey && apiKey.length > 0) ||
               import.meta.env[`VITE_${p.id.toUpperCase()}_API_KEY`] ||
               import.meta.env[`VITE_${p.id.toUpperCase()}_TOKEN`];
             const isDisabled = needsKey && !hasKey;
