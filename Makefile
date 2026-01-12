@@ -13,6 +13,10 @@ install:
 lint:
 	npm run lint
 
+# Format code
+format:
+	npm run format
+
 # Run tests
 test:
 	npm run test -- --run
