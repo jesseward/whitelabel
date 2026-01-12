@@ -34,7 +34,8 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
 
   const { format, setFormat, handleExport, getCanvasBase64 } = useMosaicExport({
     stageRef,
-    albums
+    albums,
+    enhancedImage
   });
 
   // Responsive stage sizing

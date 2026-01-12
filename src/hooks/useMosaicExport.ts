@@ -6,9 +6,10 @@ import Konva from 'konva';
 interface UseMosaicExportProps {
   stageRef: React.RefObject<Konva.Stage | null>;
   albums: AlbumArt[];
+  enhancedImage?: string | null;
 }
 
-export const useMosaicExport = ({ stageRef, albums }: UseMosaicExportProps) => {
+export const useMosaicExport = ({ stageRef, albums, enhancedImage }: UseMosaicExportProps) => {
   const [format, setFormat] = useState<'png' | 'jpeg'>('png');
   const [quality] = useState(0.9);
 
@@ -18,17 +19,31 @@ export const useMosaicExport = ({ stageRef, albums }: UseMosaicExportProps) => {
   }, [stageRef]);
 
   const handleExport = useCallback(() => {
-    if (!stageRef.current) return;
+    if (!stageRef.current && !enhancedImage) return;
 
-    const dataURL = stageRef.current.toDataURL({ 
-      pixelRatio: 3, 
-      mimeType: `image/${format}`,
-      quality: format === 'jpeg' ? quality : undefined
-    });
+    let dataURL = '';
+    let exportFormat = format;
+
+    if (enhancedImage) {
+      dataURL = enhancedImage;
+      // Detect format from data URL
+      if (dataURL.startsWith('data:image/png')) {
+        exportFormat = 'png';
+      } else if (dataURL.startsWith('data:image/jpeg') || dataURL.startsWith('data:image/jpg')) {
+        exportFormat = 'jpeg';
+      }
+    } else if (stageRef.current) {
+      dataURL = stageRef.current.toDataURL({ 
+        pixelRatio: 3, 
+        mimeType: `image/${format}`,
+        quality: format === 'jpeg' ? quality : undefined
+      });
+    }
 
     let finalDataURL = dataURL;
 
-    if (format === 'jpeg') {
+    // Only inject metadata for JPEG
+    if (exportFormat === 'jpeg') {
       try {
         const metadataString = albums.map(a => `${a.artist} - ${a.album}`).join(', ');
         const zeroth: Record<number, string> = {};
@@ -48,12 +63,12 @@ export const useMosaicExport = ({ stageRef, albums }: UseMosaicExportProps) => {
     }
 
     const link = document.createElement('a');
-    link.download = `whitelabel-${Date.now()}.${format}`;
+    link.download = `whitelabel-${Date.now()}.${exportFormat}`;
     link.href = finalDataURL;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [stageRef, format, quality, albums]);
+  }, [stageRef, format, quality, albums, enhancedImage]);
 
   return {
     format,
