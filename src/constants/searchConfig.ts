@@ -1,4 +1,5 @@
 export const SEARCH_CONFIG = {
+  BATCH_SIZE: 16,
   REGEX: {
     ARTIST: /artist:\s*(?:"([^"]+)"|'([^']+)'|(\S+))/i,
     ALBUM: /album:\s*(?:"([^"]+)"|'([^']+)'|(\S+))/i,

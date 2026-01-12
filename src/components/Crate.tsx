@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -16,13 +16,17 @@ import {
 } from '@dnd-kit/sortable';
 import { useCrateStore } from '../store/useCrateStore';
 import { SortableAlbumItem } from './SortableAlbumItem';
+import { SearchService } from '../services/searchService';
+import { SEARCH_CONFIG } from '../constants/searchConfig';
 
 interface CrateProps {
   onGenerate: () => void;
 }
 
 export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
-  const { selectedAlbums, removeAlbum, reorderAlbums, clearCrate, shuffleAlbums } = useCrateStore();
+  const { selectedAlbums, removeAlbum, reorderAlbums, clearCrate, shuffleAlbums, addAlbum } = useCrateStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -41,9 +45,59 @@ export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
     }
   };
 
+  const processBatch = async (candidates: string[]) => {
+    setIsUploading(true);
+    let successCount = 0;
+    const maxResults = SEARCH_CONFIG.BATCH_SIZE;
+    
+    // Shuffle candidates to pick randomly
+    const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+    
+    try {
+      for (const query of shuffled) {
+        if (successCount >= maxResults) break;
+        if (!query.trim()) continue;
+
+        try {
+          // Search for the item
+          const results = await SearchService.searchAll(query, 1);
+          
+          // If we found a match that isn't already in the crate (simple check)
+          if (results.length > 0) {
+            const bestMatch = results[0];
+            await addAlbum(bestMatch);
+            successCount++;
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch for query: ${query}`, err);
+        }
+      }
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (text) {
+        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+        processBatch(lines);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <aside className="bg-white dark:bg-gray-900 p-6 rounded-2xl h-fit sticky top-8 border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-4 mb-6">
         <h2 className="text-xl font-black flex items-center gap-2">
           Your Crate
           <motion.span 
@@ -56,7 +110,32 @@ export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
           </motion.span>
         </h2>
         
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+            accept=".txt"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className={`text-[10px] uppercase font-black tracking-widest transition-colors flex items-center gap-1 ${isUploading ? 'text-blue-500 animate-pulse' : 'text-gray-400 hover:text-blue-500'}`}
+            title="Batch Upload Text File"
+          >
+             {isUploading ? (
+              'Loading...'
+            ) : (
+              <>
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Import
+              </>
+            )}
+          </button>
+          
           {selectedAlbums.length > 1 && (
             <button 
               onClick={shuffleAlbums}
