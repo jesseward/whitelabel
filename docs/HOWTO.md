@@ -31,6 +31,14 @@ WhiteLabel uses a multi-provider engine (Last.fm, Discogs, MusicBrainz, Apple iT
 
 > **Tip**: Use double quotes for exact phrase matching, e.g., `artist:"The Orb"`.
 
+## Batch Import
+
+You can upload a text file (`.txt`) containing a list of songs or albums (e.g., "Artist - Title") to automatically populate your crate.
+
+- Click the **Import** button in the Crate panel.
+- The app randomly selects up to 16 lines from your file and attempts to find matches.
+- Useful for quickly generating a mosaic from a playlist export.
+
 ## The Crate (Selection Management)
 
 - **Add/Remove**: Click an album in the search results to add it to your crate. A checkmark will appear on selected items.
@@ -45,15 +53,15 @@ Click **"Create Mosaic"** to enter the design view.
 - **Backgrounds**: Choose from preset colors to match your aesthetic.
 - **Responsive Preview**: The canvas scales to fit your screen while maintaining export quality.
 
-## AI Lab (Powered by Gemini)
+## AI Stylist
 
-Transform your mosaic into a piece of art using AI style transfers.
+Give your mosaic a unique look using Gemini AI.
 
-> **Note**: This feature requires a valid Gemini API Key configured in Settings.
+> **Requirement**: A valid Gemini API Key in Settings.
 
-1. **Select a Style**: Choose from presets like _Vintage Print_, _Cyberpunk Glow_, or _Polaroid Grid_.
-2. **Add a Title**: Enter a mixtape name (e.g., "The Sofa Syndicate Vol. 1"). The AI will render this using typography that matches your chosen style.
-3. **Enhance**: The AI reimagines the entire composition while preserving your original album layout.
+1. **Style**: Select a preset like _Vintage Print_ or _Cyberpunk Glow_.
+2. **Title**: Enter a mixtape name. The AI generates typography to match the chosen style.
+3. **Enhance**: Click to reimagine your composition. The AI preserves your layout but unifies the aesthetic.
 
 ## Exporting
 

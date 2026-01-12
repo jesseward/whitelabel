@@ -10,6 +10,7 @@ WhiteLabel is a client-side web application designed for music enthusiasts to cr
 ## Features
 
 - **Multi-Provider Search**: Integrated with Last.fm, Discogs, MusicBrainz, and Apple iTunes.
+- **Batch Import**: Upload text files to automatically populate your crate with random selections from a playlist.
 - **Client-Side Configuration**: "Bring Your Own Key" allows users to input API keys directly in the UI, enabling purely static hosting.
 - **Smart Crate**: Persistent selection management with drag-and-drop reordering.
 - **Mosaic Engine**: Responsive canvas with real-time layout controls.

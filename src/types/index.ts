@@ -1,4 +1,4 @@
-export type View = "search" | "generate";
+export type View = "search" | "generate" | "help";
 
 export type Provider = "lastfm" | "discogs" | "musicbrainz" | "itunes" | "mock";
 

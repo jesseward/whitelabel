@@ -6,6 +6,7 @@ import { Crate } from "./components/Crate";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import { HelpView } from "./components/HelpView";
 import { SearchService } from "./services/searchService";
 import { useCrateStore } from "./store/useCrateStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -96,6 +97,8 @@ function App() {
               <Crate onGenerate={() => setView("generate")} />
             </div>
           </div>
+        ) : view === "help" ? (
+          <HelpView />
         ) : (
           <div className="flex flex-col items-center">
             <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
