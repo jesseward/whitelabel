@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface MosaicControlsProps {
   bgColor: string;
@@ -9,8 +9,8 @@ interface MosaicControlsProps {
   setGap: (gap: number) => void;
   padding: number;
   setPadding: (pad: number) => void;
-  format: 'png' | 'jpeg';
-  setFormat: (format: 'png' | 'jpeg') => void;
+  format: "png" | "jpeg";
+  setFormat: (format: "png" | "jpeg") => void;
   onExport: () => void;
   disabled?: boolean;
 }
@@ -27,12 +27,19 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
   format,
   setFormat,
   onExport,
-  disabled
+  disabled,
 }) => {
   const colors = [
-    '#0a0a0a', '#ffffff', '#1f2937', '#dc2626', 
-    '#ea580c', '#d97706', '#16a34a', '#2563eb', 
-    '#7c3aed', '#db2777'
+    "#0a0a0a",
+    "#ffffff",
+    "#1f2937",
+    "#dc2626",
+    "#ea580c",
+    "#d97706",
+    "#16a34a",
+    "#2563eb",
+    "#7c3aed",
+    "#db2777",
   ];
 
   return (
@@ -41,7 +48,9 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
         <div className="space-y-2">
           <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex justify-between">
             Background
-            <span className="text-gray-900 dark:text-white uppercase">{bgColor}</span>
+            <span className="text-gray-900 dark:text-white uppercase">
+              {bgColor}
+            </span>
           </label>
           <div className="grid grid-cols-5 gap-2">
             {colors.map((c) => (
@@ -50,9 +59,9 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
                 onClick={() => setBgColor(c)}
                 disabled={disabled}
                 className={`w-full aspect-square rounded-lg border transition-all ${
-                  bgColor === c 
-                    ? 'border-blue-500 scale-110 shadow-md ring-2 ring-blue-500/20' 
-                    : 'border-transparent hover:scale-105'
+                  bgColor === c
+                    ? "border-blue-500 scale-110 shadow-md ring-2 ring-blue-500/20"
+                    : "border-transparent hover:scale-105"
                 }`}
                 style={{ backgroundColor: c }}
               />
@@ -122,18 +131,20 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
       </div>
 
       <div className="space-y-4 pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
-        <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Export Settings</h4>
-        
+        <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+          Export Settings
+        </h4>
+
         <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
           <button
-            onClick={() => setFormat('png')}
-            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all ${format === 'png' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+            onClick={() => setFormat("png")}
+            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all ${format === "png" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
           >
             PNG
           </button>
           <button
-            onClick={() => setFormat('jpeg')}
-            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all ${format === 'jpeg' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+            onClick={() => setFormat("jpeg")}
+            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all ${format === "jpeg" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
           >
             JPEG
           </button>
@@ -143,8 +154,19 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
           onClick={onExport}
           className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black font-black rounded-xl hover:bg-black dark:hover:bg-gray-100 transition-all flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] mt-4"
         >
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          <svg
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            />
           </svg>
           DOWNLOAD
         </button>

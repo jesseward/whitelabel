@@ -22,12 +22,12 @@ WhiteLabel uses a multi-provider engine (Last.fm, Discogs, MusicBrainz, Apple iT
 
 **Provider Toggles**: You can quickly enable or disable specific providers for your search using the buttons located directly below the search bar. This allows you to narrow down your source (e.g., searching only iTunes for high-res covers).
 
-| Format | Example | Description |
-| :--- | :--- | :--- |
-| **General** | `Boards of Canada` | Searches both Artist and Album fields. |
-| **Artist Only** | `artist:Aphex Twin` | Only returns results matching the specified Artist. |
-| **Album Only** | `album:Geogaddi` | Only returns results matching the specified Album title. |
-| **Combined** | `artist:Autechre album:Amber` | Finds the specific album by the specific artist. |
+| Format          | Example                       | Description                                              |
+| :-------------- | :---------------------------- | :------------------------------------------------------- |
+| **General**     | `Boards of Canada`            | Searches both Artist and Album fields.                   |
+| **Artist Only** | `artist:Aphex Twin`           | Only returns results matching the specified Artist.      |
+| **Album Only**  | `album:Geogaddi`              | Only returns results matching the specified Album title. |
+| **Combined**    | `artist:Autechre album:Amber` | Finds the specific album by the specific artist.         |
 
 > **Tip**: Use double quotes for exact phrase matching, e.g., `artist:"The Orb"`.
 
@@ -51,7 +51,7 @@ Transform your mosaic into a piece of art using AI style transfers.
 
 > **Note**: This feature requires a valid Gemini API Key configured in Settings.
 
-1. **Select a Style**: Choose from presets like *Vintage Print*, *Cyberpunk Glow*, or *Polaroid Grid*.
+1. **Select a Style**: Choose from presets like _Vintage Print_, _Cyberpunk Glow_, or _Polaroid Grid_.
 2. **Add a Title**: Enter a mixtape name (e.g., "The Sofa Syndicate Vol. 1"). The AI will render this using typography that matches your chosen style.
 3. **Enhance**: The AI reimagines the entire composition while preserving your original album layout.
 

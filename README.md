@@ -24,6 +24,7 @@ WhiteLabel is a client-side web application designed for music enthusiasts to cr
 ## Getting Started
 
 1. **Install Dependencies**:
+
    ```bash
    npm install
    # or
@@ -32,6 +33,7 @@ WhiteLabel is a client-side web application designed for music enthusiasts to cr
 
 2. **Configure Environment Variables (Optional)**:
    For local development, you can create a `.env` file in the root directory. Alternatively, you can input these keys via the UI Settings menu after starting the app.
+
    ```env
    VITE_LASTFM_API_KEY=your_lastfm_key
    VITE_DISCOGS_TOKEN=your_discogs_token
@@ -64,12 +66,15 @@ The compiled files will be located in the `dist/` directory.
 The application is a pure static site (SPA).
 
 ### GitHub Pages (Automated)
+
 This repository includes a GitHub Action (`.github/workflows/deploy.yml`) that automatically builds and deploys the application to GitHub Pages whenever you push to the `main` branch.
 
 ### Manual Deployment
+
 You can deploy the contents of the `dist/` folder to any static hosting provider such as Vercel, Netlify, or AWS S3.
 
 ### Important Note on CORS
+
 The application uses `wsrv.nl` as an image proxy to handle CORS and performance optimization for album covers. No additional server-side configuration is required.
 
 ## Documentation

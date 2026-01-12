@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Provider } from '../types';
-import { PROVIDERS } from '../constants/providers';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { Provider } from "../types";
+import { PROVIDERS } from "../constants/providers";
 
 interface SettingsState {
   enabledProviders: Record<Provider, boolean>;
@@ -11,7 +11,7 @@ interface SettingsState {
     gemini: string;
   };
   toggleProvider: (provider: Provider) => void;
-  setApiKey: (service: 'lastfm' | 'discogs' | 'gemini', key: string) => void;
+  setApiKey: (service: "lastfm" | "discogs" | "gemini", key: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -25,28 +25,28 @@ export const useSettingsStore = create<SettingsState>()(
         mock: PROVIDERS.mock.defaultEnabled,
       },
       apiKeys: {
-        lastfm: '',
-        discogs: '',
-        gemini: '',
+        lastfm: "",
+        discogs: "",
+        gemini: "",
       },
-      toggleProvider: (provider) => 
+      toggleProvider: (provider) =>
         set((state) => ({
           enabledProviders: {
             ...state.enabledProviders,
-            [provider]: !state.enabledProviders[provider]
-          }
+            [provider]: !state.enabledProviders[provider],
+          },
         })),
       setApiKey: (service, key) =>
         set((state) => ({
           apiKeys: {
             ...state.apiKeys,
-            [service]: key
-          }
+            [service]: key,
+          },
         })),
     }),
     {
-      name: 'whitelabel-settings',
+      name: "whitelabel-settings",
       version: 1, // Increment to invalidate old storage containing 'theaudiodb'
-    }
-  )
+    },
+  ),
 );

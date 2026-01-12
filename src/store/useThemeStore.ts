@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-type Theme = 'dark' | 'light';
+type Theme = "dark" | "light";
 
 interface ThemeState {
   theme: Theme;
@@ -11,11 +11,12 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: 'dark',
-      toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+      theme: "dark",
+      toggleTheme: () =>
+        set((state) => ({ theme: state.theme === "dark" ? "light" : "dark" })),
     }),
     {
-      name: 'whitelabel-theme',
-    }
-  )
+      name: "whitelabel-theme",
+    },
+  ),
 );

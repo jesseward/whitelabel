@@ -12,7 +12,11 @@ import { useThemeStore } from "./store/useThemeStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import type { View } from "./types";
 
-const MosaicCanvas = lazy(() => import("./components/MosaicCanvas").then(module => ({ default: module.MosaicCanvas })));
+const MosaicCanvas = lazy(() =>
+  import("./components/MosaicCanvas").then((module) => ({
+    default: module.MosaicCanvas,
+  })),
+);
 
 function App() {
   const [view, setView] = useState<View>("search");
@@ -58,10 +62,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white p-4 md:p-8 selection:bg-blue-500/30 transition-colors duration-300 flex flex-col">
-      <Header 
-        view={view} 
-        setView={setView} 
-        onOpenSettings={() => setIsSettingsOpen(true)} 
+      <Header
+        view={view}
+        setView={setView}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       <SettingsDialog
@@ -97,11 +101,13 @@ function App() {
             <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
               Preview Your Artwork
             </h2>
-            <Suspense fallback={
-              <div className="flex items-center justify-center h-96">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-              </div>
-            }>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-96">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              }
+            >
               <MosaicCanvas albums={selectedAlbums} />
             </Suspense>
           </div>

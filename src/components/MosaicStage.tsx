@@ -1,8 +1,8 @@
-import React from 'react';
-import { Stage, Layer, Image as KonvaImage, Rect } from 'react-konva';
-import Konva from 'konva';
-import useImage from 'use-image';
-import type { AlbumArt } from '../types';
+import React from "react";
+import { Stage, Layer, Image as KonvaImage, Rect } from "react-konva";
+import Konva from "konva";
+import useImage from "use-image";
+import type { AlbumArt } from "../types";
 
 interface MosaicStageProps {
   stageRef: React.RefObject<Konva.Stage | null>;
@@ -15,9 +15,19 @@ interface MosaicStageProps {
   isHidden?: boolean;
 }
 
-const AlbumImage = ({ album, x, y, size }: { album: AlbumArt; x: number; y: number; size: number }) => {
-  const [image] = useImage(album.localUrl || album.url, 'anonymous');
-  
+const AlbumImage = ({
+  album,
+  x,
+  y,
+  size,
+}: {
+  album: AlbumArt;
+  x: number;
+  y: number;
+  size: number;
+}) => {
+  const [image] = useImage(album.localUrl || album.url, "anonymous");
+
   return (
     <KonvaImage
       image={image}
@@ -38,21 +48,21 @@ export const MosaicStage: React.FC<MosaicStageProps> = ({
   padding,
   bgColor,
   stageSize,
-  isHidden
+  isHidden,
 }) => {
   // Calculate dimensions
   const rows = Math.ceil(albums.length / columns);
   const containerWidth = stageSize;
-  const availableWidth = containerWidth - (padding * 2) - (gap * (columns - 1));
+  const availableWidth = containerWidth - padding * 2 - gap * (columns - 1);
   const cellSize = availableWidth / columns;
-  const containerHeight = (rows * cellSize) + (gap * (rows - 1)) + (padding * 2);
+  const containerHeight = rows * cellSize + gap * (rows - 1) + padding * 2;
 
   return (
     <Stage
       width={containerWidth}
       height={containerHeight}
       ref={stageRef}
-      className={`rounded-lg overflow-hidden shadow-inner ${isHidden ? 'hidden' : 'block'}`}
+      className={`rounded-lg overflow-hidden shadow-inner ${isHidden ? "hidden" : "block"}`}
     >
       <Layer>
         <Rect
@@ -65,8 +75,8 @@ export const MosaicStage: React.FC<MosaicStageProps> = ({
         {albums.map((album, index) => {
           const col = index % columns;
           const row = Math.floor(index / columns);
-          const x = padding + (col * (cellSize + gap));
-          const y = padding + (row * (cellSize + gap));
+          const x = padding + col * (cellSize + gap);
+          const y = padding + row * (cellSize + gap);
 
           return (
             <AlbumImage

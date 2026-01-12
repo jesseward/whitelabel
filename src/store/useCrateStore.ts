@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import type { AlbumArt } from '../types';
-import { getProxiedUrl } from '../utils/imageProxy';
-import { CrateStorageService } from '../services/crateStorageService';
+import { create } from "zustand";
+import type { AlbumArt } from "../types";
+import { getProxiedUrl } from "../utils/imageProxy";
+import { CrateStorageService } from "../services/crateStorageService";
 
 interface CrateState {
   selectedAlbums: AlbumArt[];
@@ -16,7 +16,7 @@ interface CrateState {
 
 const fetchImageBlob = async (url: string): Promise<string | null> => {
   try {
-    const res = await fetch(getProxiedUrl(url, 'medium'));
+    const res = await fetch(getProxiedUrl(url, "medium"));
     const blob = await res.blob();
     return URL.createObjectURL(blob);
   } catch (error) {
@@ -32,7 +32,7 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
   hydrate: async () => {
     try {
       const savedAlbums = await CrateStorageService.load();
-      
+
       // 1. Set state immediately with saved data (showing placeholders/remote URLs)
       set({ selectedAlbums: savedAlbums, isHydrated: true });
 
@@ -41,14 +41,13 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
         savedAlbums.map(async (album) => {
           const localUrl = await fetchImageBlob(album.url);
           return localUrl ? { ...album, localUrl } : album;
-        })
+        }),
       );
-      
+
       // 3. Update state with blobs
       set({ selectedAlbums: albumsWithBlobs });
-      
     } catch (error) {
-      console.error('Hydration failed:', error);
+      console.error("Hydration failed:", error);
       set({ isHydrated: true });
     }
   },
@@ -60,7 +59,7 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
     // 1. Optimistic Update: Add immediately
     const newAlbums = [...selectedAlbums, album];
     set({ selectedAlbums: newAlbums });
-    
+
     // 2. Persist to DB (async, doesn't block UI)
     CrateStorageService.save(newAlbums).catch(console.error);
 
@@ -68,9 +67,9 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
     const localUrl = await fetchImageBlob(album.url);
     if (localUrl) {
       set((state) => ({
-        selectedAlbums: state.selectedAlbums.map((a) => 
-          a.id === album.id ? { ...a, localUrl } : a
-        )
+        selectedAlbums: state.selectedAlbums.map((a) =>
+          a.id === album.id ? { ...a, localUrl } : a,
+        ),
       }));
     }
   },
@@ -78,7 +77,7 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
   removeAlbum: (albumId) => {
     const { selectedAlbums } = getStore();
     const albumToRemove = selectedAlbums.find((a) => a.id === albumId);
-    
+
     if (albumToRemove?.localUrl) {
       URL.revokeObjectURL(albumToRemove.localUrl);
     }
@@ -93,7 +92,7 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
     const result = Array.from(selectedAlbums);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
-    
+
     set({ selectedAlbums: result });
     CrateStorageService.save(result).catch(console.error);
   },

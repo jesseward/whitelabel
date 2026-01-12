@@ -1,37 +1,54 @@
-import React, { useState } from 'react';
-import { useSettingsStore } from '../store/useSettingsStore';
-import { AI_STYLES, AIService, type AIStyle, FONT_OPTIONS, type FontOption, LAYOUT_OPTIONS, type LayoutOption } from '../services/aiService';
+import React, { useState } from "react";
+import { useSettingsStore } from "../store/useSettingsStore";
+import {
+  AI_STYLES,
+  AIService,
+  type AIStyle,
+  FONT_OPTIONS,
+  type FontOption,
+  LAYOUT_OPTIONS,
+  type LayoutOption,
+} from "../services/aiService";
 
 interface AIPanelProps {
   onGetImageSource: () => string;
   onEnhanced: (newImage: string) => void;
 }
 
-export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }) => {
+export const AIPanel: React.FC<AIPanelProps> = ({
+  onGetImageSource,
+  onEnhanced,
+}) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<AIStyle | null>(null);
-  const [selectedFontStyle, setSelectedFontStyle] = useState<FontOption | null>(null);
-  const [selectedLayout, setSelectedLayout] = useState<LayoutOption | null>(null);
-  const [title, setTitle] = useState('');
+  const [selectedFontStyle, setSelectedFontStyle] = useState<FontOption | null>(
+    null,
+  );
+  const [selectedLayout, setSelectedLayout] = useState<LayoutOption | null>(
+    null,
+  );
+  const [title, setTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { apiKeys } = useSettingsStore();
 
-  const hasKey = (apiKeys.gemini && apiKeys.gemini.length > 0) || import.meta.env.VITE_GEMINI_API_KEY;
+  const hasKey =
+    (apiKeys.gemini && apiKeys.gemini.length > 0) ||
+    import.meta.env.VITE_GEMINI_API_KEY;
 
   const handleEnhance = async () => {
     if (!selectedStyle) return;
-    
+
     setIsProcessing(true);
     setError(null);
-    
+
     try {
       const imageSource = onGetImageSource();
       const result = await AIService.enhanceMosaic(
-        imageSource, 
-        selectedStyle, 
-        title, 
+        imageSource,
+        selectedStyle,
+        title,
         selectedFontStyle || undefined,
-        selectedLayout || undefined
+        selectedLayout || undefined,
       );
       onEnhanced(result);
     } catch (err) {
@@ -55,7 +72,9 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Mix Tape Title</label>
+          <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+            Mix Tape Title
+          </label>
           <input
             type="text"
             value={title}
@@ -66,7 +85,9 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Select Style</label>
+          <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+            Select Style
+          </label>
           <div className="space-y-2">
             {AI_STYLES.map((style) => (
               <button
@@ -74,14 +95,18 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
                 onClick={() => setSelectedStyle(style)}
                 className={`w-full p-4 rounded-xl border text-left transition-all ${
                   selectedStyle?.id === style.id
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
-                    : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                    ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10"
+                    : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                 }`}
               >
-                <p className={`text-sm font-bold ${selectedStyle?.id === style.id ? 'text-purple-600 dark:text-purple-400' : ''}`}>
+                <p
+                  className={`text-sm font-bold ${selectedStyle?.id === style.id ? "text-purple-600 dark:text-purple-400" : ""}`}
+                >
                   {style.name}
                 </p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{style.description}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                  {style.description}
+                </p>
               </button>
             ))}
           </div>
@@ -97,22 +122,32 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
                 {LAYOUT_OPTIONS.map((layout) => (
                   <button
                     key={layout.id}
-                    onClick={() => setSelectedLayout(selectedLayout?.id === layout.id ? null : layout)}
+                    onClick={() =>
+                      setSelectedLayout(
+                        selectedLayout?.id === layout.id ? null : layout,
+                      )
+                    }
                     className={`w-full p-4 rounded-xl border text-left transition-all ${
                       selectedLayout?.id === layout.id
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10'
-                        : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                        ? "border-orange-500 bg-orange-50 dark:bg-orange-500/10"
+                        : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className={`text-sm font-bold ${selectedLayout?.id === layout.id ? 'text-orange-600 dark:text-orange-400' : ''}`}>
+                      <p
+                        className={`text-sm font-bold ${selectedLayout?.id === layout.id ? "text-orange-600 dark:text-orange-400" : ""}`}
+                      >
                         {layout.name}
                       </p>
                       {selectedLayout?.id === layout.id && (
-                        <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 px-2 py-0.5 rounded-full font-bold">SELECTED</span>
+                        <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 px-2 py-0.5 rounded-full font-bold">
+                          SELECTED
+                        </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{layout.description}</p>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                      {layout.description}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -126,22 +161,32 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
                 {FONT_OPTIONS.map((font) => (
                   <button
                     key={font.id}
-                    onClick={() => setSelectedFontStyle(selectedFontStyle?.id === font.id ? null : font)}
+                    onClick={() =>
+                      setSelectedFontStyle(
+                        selectedFontStyle?.id === font.id ? null : font,
+                      )
+                    }
                     className={`w-full p-4 rounded-xl border text-left transition-all ${
                       selectedFontStyle?.id === font.id
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10'
-                        : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10"
+                        : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className={`text-sm font-bold ${selectedFontStyle?.id === font.id ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                      <p
+                        className={`text-sm font-bold ${selectedFontStyle?.id === font.id ? "text-blue-600 dark:text-blue-400" : ""}`}
+                      >
                         {font.name}
                       </p>
                       {selectedFontStyle?.id === font.id && (
-                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full font-bold">SELECTED</span>
+                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full font-bold">
+                          SELECTED
+                        </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{font.description}</p>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                      {font.description}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -159,11 +204,11 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
       <button
         onClick={handleEnhance}
         disabled={!selectedStyle || isProcessing || !hasKey}
-        title={!hasKey ? 'Gemini API Key required. Configure in Settings.' : ''}
+        title={!hasKey ? "Gemini API Key required. Configure in Settings." : ""}
         className={`w-full py-4 font-black rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] ${
           !selectedStyle || isProcessing || !hasKey
-            ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
-            : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-purple-500/20'
+            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+            : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-purple-500/20"
         }`}
       >
         {isProcessing ? (
@@ -173,20 +218,31 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onGetImageSource, onEnhanced }
           </>
         ) : (
           <>
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
             ENHANCE & ADD TITLE
           </>
         )}
       </button>
-      
+
       {!hasKey && (
         <p className="text-[10px] text-center text-red-500 font-bold">
           API Key Missing
         </p>
       )}
-      
+
       <p className="text-[9px] text-center text-gray-400 dark:text-gray-600 uppercase font-black tracking-widest">
         Powered by Gemini Nano Banana
       </p>

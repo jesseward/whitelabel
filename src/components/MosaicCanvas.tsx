@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState } from 'react';
-import type { AlbumArt } from '../types';
-import { AIPanel } from './AIPanel';
-import Konva from 'konva';
-import { useMosaicExport } from '../hooks/useMosaicExport';
-import { MosaicControls } from './MosaicControls';
-import { MosaicStage } from './MosaicStage';
+import React, { useRef, useEffect, useState } from "react";
+import type { AlbumArt } from "../types";
+import { AIPanel } from "./AIPanel";
+import Konva from "konva";
+import { useMosaicExport } from "../hooks/useMosaicExport";
+import { MosaicControls } from "./MosaicControls";
+import { MosaicStage } from "./MosaicStage";
 
 interface MosaicCanvasProps {
   albums: AlbumArt[];
@@ -19,7 +19,7 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
   columns: initialColumns = 3,
   gap: initialGap = 2,
   padding: initialPadding = 6,
-  backgroundColor: initialBgColor = '#0a0a0a',
+  backgroundColor: initialBgColor = "#0a0a0a",
 }) => {
   const stageRef = useRef<Konva.Stage>(null);
   const [stageSize, setStageSize] = useState(800);
@@ -27,15 +27,15 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
   const [gap, setGap] = useState(initialGap);
   const [padding, setPadding] = useState(initialPadding);
   const [bgColor, setBgColor] = useState(initialBgColor);
-  const [activeTab, setActiveTab] = useState<'settings' | 'ai'>('settings');
-  
+  const [activeTab, setActiveTab] = useState<"settings" | "ai">("settings");
+
   // AI Enhanced Image State
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
 
   const { format, setFormat, handleExport, getCanvasBase64 } = useMosaicExport({
     stageRef,
     albums,
-    enhancedImage
+    enhancedImage,
   });
 
   // Responsive stage sizing
@@ -44,16 +44,15 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
       const width = Math.min(window.innerWidth - 40, 800);
       setStageSize(width);
     };
-    window.addEventListener('resize', updateSize);
+    window.addEventListener("resize", updateSize);
     updateSize();
-    return () => window.removeEventListener('resize', updateSize);
+    return () => window.removeEventListener("resize", updateSize);
   }, []);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 w-full max-w-7xl items-start">
       <div className="flex-1 flex flex-col items-center gap-6 w-full">
         <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 w-full overflow-hidden flex justify-center relative">
-          
           <MosaicStage
             stageRef={stageRef}
             albums={albums}
@@ -68,12 +67,12 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
           {/* AI Result Overlay */}
           {enhancedImage && (
             <div className="relative group animate-in zoom-in-95 duration-500">
-              <img 
-                src={enhancedImage} 
-                alt="AI Enhanced" 
+              <img
+                src={enhancedImage}
+                alt="AI Enhanced"
                 className="rounded-lg shadow-2xl max-w-full"
               />
-              <button 
+              <button
                 onClick={() => setEnhancedImage(null)}
                 className="absolute top-4 right-4 bg-black/50 hover:bg-black text-white px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md transition-all opacity-0 group-hover:opacity-100"
               >
@@ -86,7 +85,10 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
         {enhancedImage && (
           <div className="bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 p-4 rounded-xl text-center w-full">
             <p className="text-sm font-bold">✨ AI Enhancement Applied</p>
-            <p className="text-xs">Your image has been reimagined by Nano Banana. You can still adjust export settings below.</p>
+            <p className="text-xs">
+              Your image has been reimagined by Nano Banana. You can still
+              adjust export settings below.
+            </p>
           </div>
         )}
       </div>
@@ -95,28 +97,28 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
           <div className="flex border-b border-gray-100 dark:border-gray-800">
             <button
-              onClick={() => setActiveTab('settings')}
+              onClick={() => setActiveTab("settings")}
               className={`flex-1 py-4 text-xs font-black tracking-widest uppercase transition-colors ${
-                activeTab === 'settings' 
-                  ? 'bg-gray-50 dark:bg-gray-800/50 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' 
-                  : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                activeTab === "settings"
+                  ? "bg-gray-50 dark:bg-gray-800/50 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
               }`}
             >
               Canvas Settings
             </button>
             <button
-              onClick={() => setActiveTab('ai')}
+              onClick={() => setActiveTab("ai")}
               className={`flex-1 py-4 text-xs font-black tracking-widest uppercase transition-colors ${
-                activeTab === 'ai' 
-                  ? 'bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 border-b-2 border-purple-500' 
-                  : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                activeTab === "ai"
+                  ? "bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 border-b-2 border-purple-500"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
               }`}
             >
               AI Lab
             </button>
           </div>
 
-          {activeTab === 'settings' ? (
+          {activeTab === "settings" ? (
             <MosaicControls
               bgColor={bgColor}
               setBgColor={setBgColor}
@@ -132,9 +134,9 @@ export const MosaicCanvas: React.FC<MosaicCanvasProps> = ({
               disabled={!!enhancedImage}
             />
           ) : (
-            <AIPanel 
-              onGetImageSource={getCanvasBase64} 
-              onEnhanced={(newImg: string) => setEnhancedImage(newImg)} 
+            <AIPanel
+              onGetImageSource={getCanvasBase64}
+              onEnhanced={(newImg: string) => setEnhancedImage(newImg)}
             />
           )}
         </div>

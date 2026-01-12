@@ -5,9 +5,9 @@ export const SEARCH_CONFIG = {
     ALBUM: /album:\s*(?:"([^"]+)"|'([^']+)'|(\S+))/i,
   },
   PLACEHOLDERS: [
-    'default_album_artwork',
-    'no-cover',
-    'spacer.gif',
-    'placeholder'
-  ]
+    "default_album_artwork",
+    "no-cover",
+    "spacer.gif",
+    "placeholder",
+  ],
 };

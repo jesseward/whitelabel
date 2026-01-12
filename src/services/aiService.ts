@@ -112,19 +112,22 @@ export const LAYOUT_OPTIONS: LayoutOption[] = [
     id: "header",
     name: "Top Header Strip",
     description: "Classic 'Stereo' or 'Master' strip at the top",
-    instruction: "Add a distinct, solid-color header strip across the entire top of the image. The strip should look like a classic vinyl 'Stereo' or 'Original Master Recording' banner. Ensure this area has a clear, high-contrast background suitable for text.",
+    instruction:
+      "Add a distinct, solid-color header strip across the entire top of the image. The strip should look like a classic vinyl 'Stereo' or 'Original Master Recording' banner. Ensure this area has a clear, high-contrast background suitable for text.",
   },
   {
     id: "footer",
     name: "Bottom Footer Strip",
     description: "Clean band at the bottom for title",
-    instruction: "Add a distinct, solid-color footer strip across the entire bottom of the image. This area should look like a dedicated title space with a clear, high-contrast background suitable for text.",
+    instruction:
+      "Add a distinct, solid-color footer strip across the entire bottom of the image. This area should look like a dedicated title space with a clear, high-contrast background suitable for text.",
   },
   {
     id: "sticker",
     name: "Hype Sticker",
     description: "Sticker on shrink wrap (Top Right)",
-    instruction: "Add a realistic 'hype sticker' to the top-right corner of the image. It should look like it's adhered to the shrink wrap of a vinyl record. The sticker should have a solid background (round or rectangular) providing a clear area for text.",
+    instruction:
+      "Add a realistic 'hype sticker' to the top-right corner of the image. It should look like it's adhered to the shrink wrap of a vinyl record. The sticker should have a solid background (round or rectangular) providing a clear area for text.",
   },
 ];
 
@@ -151,10 +154,11 @@ export const AIService = {
       const textInstruction = fontStyle
         ? fontStyle.instruction
         : style.textInstructions;
-      
-      let placementInstruction = "Ensure the text is clearly legible but integrated into the style.";
+
+      let placementInstruction =
+        "Ensure the text is clearly legible but integrated into the style.";
       if (layout) {
-        placementInstruction = `Place the text "${title}" INSIDE the ${layout.name.toLowerCase().includes('sticker') ? 'hype sticker' : 'strip'} created above.`;
+        placementInstruction = `Place the text "${title}" INSIDE the ${layout.name.toLowerCase().includes("sticker") ? "hype sticker" : "strip"} created above.`;
       }
 
       finalPrompt += ` Add the text "${title}" to the image. ${textInstruction} ${placementInstruction}`;
