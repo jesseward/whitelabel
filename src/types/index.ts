@@ -1,3 +1,5 @@
+export type View = 'search' | 'generate';
+
 export type Provider = 'lastfm' | 'discogs' | 'musicbrainz' | 'itunes' | 'mock';
 
 export interface AlbumArt {
