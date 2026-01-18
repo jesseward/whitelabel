@@ -5,6 +5,10 @@
 
 WhiteLabel is a client-side web application allowing you to create mosciacs from album art. You can optionally apply effects using Gemini's Nano Banana model, for example ..
 
+![Nightmares On Wax](docs/in-a-space.jpeg)
+
+or
+
 ![Aphex Example](docs/example-render.jpeg)
 
 ## Features
