@@ -12,17 +12,23 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          "vendor-ui": [
-            "framer-motion",
-            "@dnd-kit/core",
-            "@dnd-kit/sortable",
-            "@dnd-kit/utilities",
+        codeSplitting: {
+          groups: [
+            {
+              name: "vendor-ui",
+              test: /node_modules[\\/](?:framer-motion|@dnd-kit)/,
+            },
+            {
+              name: "vendor-konva",
+              test: /node_modules[\\/](?:(?:react-)?konva|use-image)/,
+            },
+            {
+              name: "vendor-utils",
+              test: /node_modules[\\/](?:piexifjs|p-throttle|idb-keyval|zustand)/,
+            },
           ],
-          "vendor-konva": ["konva", "react-konva", "use-image"],
-          "vendor-utils": ["piexifjs", "p-throttle", "idb-keyval", "zustand"],
         },
       },
     },
