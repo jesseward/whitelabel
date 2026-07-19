@@ -43,13 +43,11 @@ export const AIPanel: React.FC<AIPanelProps> = ({
 
     try {
       const imageSource = onGetImageSource();
-      const result = await AIService.enhanceMosaic(
-        imageSource,
-        selectedStyle,
+      const result = await AIService.enhanceMosaic(imageSource, selectedStyle, {
         title,
-        selectedFontStyle || undefined,
-        selectedLayout || undefined,
-      );
+        fontStyle: selectedFontStyle || undefined,
+        layout: selectedLayout || undefined,
+      });
       onEnhanced(result);
     } catch (err) {
       setError("AI Enhancement failed. Check your API key or connection.");
@@ -92,7 +90,16 @@ export const AIPanel: React.FC<AIPanelProps> = ({
             {AI_STYLES.map((style) => (
               <button
                 key={style.id}
-                onClick={() => setSelectedStyle(style)}
+                onClick={() => {
+                  setSelectedStyle(style);
+                  if (
+                    selectedLayout &&
+                    (!style.supportedLayouts ||
+                      !style.supportedLayouts.includes(selectedLayout.id))
+                  ) {
+                    setSelectedLayout(null);
+                  }
+                }}
                 className={`w-full p-4 rounded-xl border text-left transition-all ${
                   selectedStyle?.id === style.id
                     ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10"
@@ -114,44 +121,49 @@ export const AIPanel: React.FC<AIPanelProps> = ({
 
         {title && (
           <>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                Vinyl Label Layout (Optional)
-              </label>
-              <div className="space-y-2">
-                {LAYOUT_OPTIONS.map((layout) => (
-                  <button
-                    key={layout.id}
-                    onClick={() =>
-                      setSelectedLayout(
-                        selectedLayout?.id === layout.id ? null : layout,
-                      )
-                    }
-                    className={`w-full p-4 rounded-xl border text-left transition-all ${
-                      selectedLayout?.id === layout.id
-                        ? "border-orange-500 bg-orange-50 dark:bg-orange-500/10"
-                        : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <p
-                        className={`text-sm font-bold ${selectedLayout?.id === layout.id ? "text-orange-600 dark:text-orange-400" : ""}`}
+            {selectedStyle?.supportedLayouts &&
+              selectedStyle.supportedLayouts.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                    Vinyl Label Layout (Optional)
+                  </label>
+                  <div className="space-y-2">
+                    {LAYOUT_OPTIONS.filter((layout) =>
+                      selectedStyle.supportedLayouts?.includes(layout.id),
+                    ).map((layout) => (
+                      <button
+                        key={layout.id}
+                        onClick={() =>
+                          setSelectedLayout(
+                            selectedLayout?.id === layout.id ? null : layout,
+                          )
+                        }
+                        className={`w-full p-4 rounded-xl border text-left transition-all ${
+                          selectedLayout?.id === layout.id
+                            ? "border-orange-500 bg-orange-50 dark:bg-orange-500/10"
+                            : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
+                        }`}
                       >
-                        {layout.name}
-                      </p>
-                      {selectedLayout?.id === layout.id && (
-                        <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 px-2 py-0.5 rounded-full font-bold">
-                          SELECTED
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
-                      {layout.description}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </div>
+                        <div className="flex items-center justify-between">
+                          <p
+                            className={`text-sm font-bold ${selectedLayout?.id === layout.id ? "text-orange-600 dark:text-orange-400" : ""}`}
+                          >
+                            {layout.name}
+                          </p>
+                          {selectedLayout?.id === layout.id && (
+                            <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 px-2 py-0.5 rounded-full font-bold">
+                              SELECTED
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                          {layout.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">

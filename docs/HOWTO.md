@@ -63,6 +63,21 @@ Give your mosaic a unique look using Gemini AI.
 2. **Title**: Enter a mixtape name. The AI generates typography to match the chosen style.
 3. **Enhance**: Click to reimagine your composition. The AI preserves your layout but unifies the aesthetic.
 
+## Mixtape Generator
+
+Create custom 1990s-style mixtape cassette tape covers using Gemini AI.
+
+1. Switch to the **Mixtape Generator** tab in the main header.
+2. **Configuration**:
+   - **Mixtape Title**: Enter the main title (e.g., "Summer Daze '94").
+   - **DJ / Artist Name (Optional)**: Add the creator's name.
+   - **Extra Text / Info (Optional)**: Add secondary details (e.g., "Side A", "Live Mix").
+3. **Cassette Style**: Choose between:
+   - **90s Branded Cassette**: Classic Maxell XLII style with textured dark gray plastic casing and handwritten sticker label.
+   - **90s Rave Mixtape**: Clear plastic cassette revealing tape wheels and gears, with printed neon graphics.
+4. Click **Generate Mixtape Cover**.
+5. Export as PNG or JPEG. The metadata (EXIF) will automatically include your title, DJ, and extra info.
+
 ## Exporting
 
 - **Formats**: Export as high-resolution **PNG** or **JPEG**.

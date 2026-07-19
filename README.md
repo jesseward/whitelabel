@@ -20,14 +20,15 @@ or
 
 ## Documentation
 
-*   [User Guide](docs/HOWTO.md) - Detailed information on configuration, search filters, and AI features.
-*   [Technical Architecture](docs/ARCHITECTURE.md) - Codebase structure, state management, and API design.
+- [User Guide](docs/HOWTO.md) - Detailed information on configuration, search filters, and AI features.
+- [Technical Architecture](docs/ARCHITECTURE.md) - Codebase structure, state management, and API design.
 
 ## Development Setup
 
 The project includes a `Makefile` to simplify common development tasks.
 
 ### Commands
+
 ```bash
 # Install dependencies
 make install
