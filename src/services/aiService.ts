@@ -132,6 +132,16 @@ export const LAYOUT_OPTIONS: LayoutOption[] = [
 ];
 
 export const AIService = {
+  /**
+   * Enhances the mosaic image using Gemini.
+   *
+   * WARNING: This method expects the model to return an image in the response
+   * (inlineData). Standard Gemini models (like 1.5 Pro/Flash) do NOT support
+   * image output. This requires a model specifically trained/configured for
+   * image-to-image tasks (e.g., an experimental/internal model like
+   * gemini-3-pro-image-preview, or future multimodal output models).
+   * If using a standard text-only output model, this will fail.
+   */
   enhanceMosaic: async (
     base64Image: string,
     style: AIStyle,
@@ -195,7 +205,9 @@ export const AIService = {
     const firstPart = firstCandidate.content.parts[0];
 
     if (!firstPart || !firstPart.inlineData) {
-      throw new Error("No image data found in response");
+      throw new Error(
+        `No image data found in response. The model '${MODEL_NAME}' may not support image-to-image output. Ensure you are using a model that supports image generation/multimodal output.`,
+      );
     }
 
     const { mimeType, data } = firstPart.inlineData;

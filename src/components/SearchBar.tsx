@@ -17,7 +17,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     onSearch(query);
   };
 
-  const providers = PROVIDER_LIST.filter((p) => p.id !== "mock");
+  const providers = PROVIDER_LIST;
 
   return (
     <div className="mb-8">

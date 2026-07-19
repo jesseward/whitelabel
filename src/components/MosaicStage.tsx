@@ -3,6 +3,7 @@ import { Stage, Layer, Image as KonvaImage, Rect } from "react-konva";
 import Konva from "konva";
 import useImage from "use-image";
 import type { AlbumArt } from "../types";
+import { getProxiedUrl } from "../utils/imageProxy";
 
 interface MosaicStageProps {
   stageRef: React.RefObject<Konva.Stage | null>;
@@ -26,7 +27,10 @@ const AlbumImage = ({
   y: number;
   size: number;
 }) => {
-  const [image] = useImage(album.localUrl || album.url, "anonymous");
+  const [image] = useImage(
+    album.localUrl || getProxiedUrl(album.url, "medium"),
+    "anonymous",
+  );
 
   return (
     <KonvaImage

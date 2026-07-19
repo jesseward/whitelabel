@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { AlbumArt } from "../types";
 import {
   DndContext,
   closestCenter,
@@ -30,7 +31,7 @@ export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
     reorderAlbums,
     clearCrate,
     shuffleAlbums,
-    addAlbum,
+    addAlbums,
   } = useCrateStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -54,30 +55,32 @@ export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
 
   const processBatch = async (candidates: string[]) => {
     setIsUploading(true);
-    let successCount = 0;
     const maxResults = SEARCH_CONFIG.BATCH_SIZE;
 
     // Shuffle candidates to pick randomly
     const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+    const targetChunk = shuffled.slice(0, maxResults * 2);
 
     try {
-      for (const query of shuffled) {
-        if (successCount >= maxResults) break;
-        if (!query.trim()) continue;
-
-        try {
-          // Search for the item
-          const results = await SearchService.searchAll(query, 1);
-
-          // If we found a match that isn't already in the crate (simple check)
-          if (results.length > 0) {
-            const bestMatch = results[0];
-            await addAlbum(bestMatch);
-            successCount++;
-          }
-        } catch (err) {
+      const searchPromises = targetChunk.map((query) =>
+        SearchService.searchAll(query, 1).catch((err) => {
           console.warn(`Failed to fetch for query: ${query}`, err);
+          return [] as AlbumArt[];
+        }),
+      );
+
+      const searchResults = await Promise.all(searchPromises);
+
+      const matches: AlbumArt[] = [];
+      for (const results of searchResults) {
+        if (results && results.length > 0) {
+          matches.push(results[0]);
         }
+      }
+
+      const albumsToAdd = matches.slice(0, maxResults);
+      if (albumsToAdd.length > 0) {
+        await addAlbums(albumsToAdd);
       }
     } finally {
       setIsUploading(false);

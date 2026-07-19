@@ -30,7 +30,7 @@ describe("useCrateStore", () => {
       url: "https://example.com/art.jpg",
       artist: "Artist",
       album: "Album",
-      provider: "mock" as const,
+      provider: "itunes" as const,
     };
 
     // Mock successful fetch
@@ -45,13 +45,41 @@ describe("useCrateStore", () => {
     expect(state.selectedAlbums[0].localUrl).toBe("blob:mock-url");
   });
 
+  it("should add multiple albums and create local URLs", async () => {
+    const mockAlbum1 = {
+      id: "1",
+      url: "https://example.com/art1.jpg",
+      artist: "Artist 1",
+      album: "Album 1",
+      provider: "itunes" as const,
+    };
+    const mockAlbum2 = {
+      id: "2",
+      url: "https://example.com/art2.jpg",
+      artist: "Artist 2",
+      album: "Album 2",
+      provider: "itunes" as const,
+    };
+
+    (globalThis.fetch as Mock).mockResolvedValue({
+      blob: () => Promise.resolve(new Blob()),
+    });
+
+    await useCrateStore.getState().addAlbums([mockAlbum1, mockAlbum2]);
+
+    const state = useCrateStore.getState();
+    expect(state.selectedAlbums).toHaveLength(2);
+    expect(state.selectedAlbums[0].localUrl).toBe("blob:mock-url");
+    expect(state.selectedAlbums[1].localUrl).toBe("blob:mock-url");
+  });
+
   it("should not add duplicate albums", async () => {
     const mockAlbum = {
       id: "1",
       url: "test",
       artist: "A",
       album: "B",
-      provider: "mock" as const,
+      provider: "itunes" as const,
     };
 
     (globalThis.fetch as Mock).mockResolvedValue({
@@ -71,7 +99,7 @@ describe("useCrateStore", () => {
       localUrl: "blob:to-revoke",
       artist: "A",
       album: "B",
-      provider: "mock" as const,
+      provider: "itunes" as const,
     };
 
     // Manually set state to test removal

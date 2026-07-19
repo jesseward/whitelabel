@@ -13,7 +13,7 @@ or
 
 ## Features
 
-- **Multi-Provider Search**: Fetch album alrt from sources :  Last.fm, Discogs, MusicBrainz, and Apple iTunes.
+- **Multi-Provider Search**: Fetch album alrt from sources : Last.fm, Discogs, MusicBrainz, and Apple iTunes.
 - **Batch Import**: Upload text files to automatically populate your crate with random selections from a playlist.
 - **Client-Side Configuration**: "Bring Your Own Key" allows users to input API keys directly in the UI, enabling purely static hosting.
 - **AI Lab**: Style transfers and custom typography powered by Gemini Nano Banana.
