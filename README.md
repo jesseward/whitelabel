@@ -20,7 +20,33 @@ or
 
 ## Documentation
 
-For detailed information on configuration, search filters, and AI features, see the [User Guide](docs/HOWTO.md).
+*   [User Guide](docs/HOWTO.md) - Detailed information on configuration, search filters, and AI features.
+*   [Technical Architecture](docs/ARCHITECTURE.md) - Codebase structure, state management, and API design.
+
+## Development Setup
+
+The project includes a `Makefile` to simplify common development tasks.
+
+### Commands
+```bash
+# Install dependencies
+make install
+
+# Start local development server
+npm run dev
+
+# Run linter
+make lint
+
+# Run unit tests
+make test
+
+# Build for production
+make build
+
+# Clean build artifacts
+make clean
+```
 
 ## How
 
