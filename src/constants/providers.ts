@@ -32,12 +32,6 @@ export const PROVIDERS: Record<Provider, ProviderMetadata> = {
     requiresKey: false,
     defaultEnabled: true,
   },
-  mock: {
-    id: "mock",
-    name: "Mock Data",
-    requiresKey: false,
-    defaultEnabled: false,
-  },
 };
 
 export const PROVIDER_LIST = Object.values(PROVIDERS);

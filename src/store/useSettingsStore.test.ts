@@ -10,7 +10,6 @@ describe("useSettingsStore", () => {
         discogs: true,
         musicbrainz: true,
         itunes: true,
-        mock: false,
       },
       apiKeys: {
         lastfm: "",

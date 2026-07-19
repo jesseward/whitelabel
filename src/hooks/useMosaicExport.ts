@@ -3,6 +3,9 @@ import type { AlbumArt } from "../types";
 import piexif from "piexifjs";
 import Konva from "konva";
 
+const PREVIEW_PIXEL_RATIO = 2; // Lower ratio for faster preview generation
+const EXPORT_PIXEL_RATIO = 3; // Higher ratio for high-quality export
+
 interface UseMosaicExportProps {
   stageRef: React.RefObject<Konva.Stage | null>;
   albums: AlbumArt[];
@@ -19,7 +22,7 @@ export const useMosaicExport = ({
 
   const getCanvasBase64 = useCallback(() => {
     if (!stageRef.current) return "";
-    return stageRef.current.toDataURL({ pixelRatio: 2 });
+    return stageRef.current.toDataURL({ pixelRatio: PREVIEW_PIXEL_RATIO });
   }, [stageRef]);
 
   const handleExport = useCallback(() => {
@@ -41,7 +44,7 @@ export const useMosaicExport = ({
       }
     } else if (stageRef.current) {
       dataURL = stageRef.current.toDataURL({
-        pixelRatio: 3,
+        pixelRatio: EXPORT_PIXEL_RATIO,
         mimeType: `image/${format}`,
         quality: format === "jpeg" ? quality : undefined,
       });

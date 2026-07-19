@@ -22,7 +22,6 @@ export const useSettingsStore = create<SettingsState>()(
         discogs: PROVIDERS.discogs.defaultEnabled,
         musicbrainz: PROVIDERS.musicbrainz.defaultEnabled,
         itunes: PROVIDERS.itunes.defaultEnabled,
-        mock: PROVIDERS.mock.defaultEnabled,
       },
       apiKeys: {
         lastfm: "",

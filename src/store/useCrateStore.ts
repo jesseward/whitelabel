@@ -7,6 +7,7 @@ interface CrateState {
   selectedAlbums: AlbumArt[];
   isHydrated: boolean;
   addAlbum: (album: AlbumArt) => Promise<void>;
+  addAlbums: (albums: AlbumArt[]) => Promise<void>;
   removeAlbum: (albumId: string) => void;
   reorderAlbums: (startIndex: number, endIndex: number) => void;
   shuffleAlbums: () => void;
@@ -72,6 +73,32 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
         ),
       }));
     }
+  },
+
+  addAlbums: async (albums) => {
+    const { selectedAlbums } = getStore();
+    const uniqueNewAlbums = albums.filter(
+      (newAlbum) => !selectedAlbums.some((a) => a.id === newAlbum.id),
+    );
+    if (uniqueNewAlbums.length === 0) return;
+
+    const newAlbums = [...selectedAlbums, ...uniqueNewAlbums];
+    set({ selectedAlbums: newAlbums });
+    CrateStorageService.save(newAlbums).catch(console.error);
+
+    // Fetch blobs
+    await Promise.all(
+      uniqueNewAlbums.map(async (album) => {
+        const localUrl = await fetchImageBlob(album.url);
+        if (localUrl) {
+          set((state) => ({
+            selectedAlbums: state.selectedAlbums.map((a) =>
+              a.id === album.id ? { ...a, localUrl } : a,
+            ),
+          }));
+        }
+      }),
+    );
   },
 
   removeAlbum: (albumId) => {
