@@ -58,6 +58,7 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
                 key={c}
                 onClick={() => setBgColor(c)}
                 disabled={disabled}
+                aria-label={`Set background color to ${c}`}
                 className={`w-full aspect-square rounded-lg border transition-all ${
                   bgColor === c
                     ? "border-blue-500 scale-110 shadow-md ring-2 ring-blue-500/20"
@@ -71,6 +72,7 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
                 type="color"
                 value={bgColor}
                 onChange={(e) => setBgColor(e.target.value)}
+                aria-label="Custom Background Color Picker"
                 className="w-full h-8 cursor-pointer rounded-lg overflow-hidden opacity-0 absolute inset-0 z-10"
                 disabled={disabled}
               />
@@ -92,6 +94,7 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
             max="10"
             value={columns}
             disabled={disabled}
+            aria-label="Columns"
             onChange={(e) => setColumns(parseInt(e.target.value))}
             className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50"
           />
@@ -108,6 +111,7 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
             max="50"
             value={gap}
             disabled={disabled}
+            aria-label="Gap"
             onChange={(e) => setGap(parseInt(e.target.value))}
             className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50"
           />
@@ -124,6 +128,7 @@ export const MosaicControls: React.FC<MosaicControlsProps> = ({
             max="100"
             value={padding}
             disabled={disabled}
+            aria-label="Padding"
             onChange={(e) => setPadding(parseInt(e.target.value))}
             className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50"
           />

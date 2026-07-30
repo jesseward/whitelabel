@@ -30,6 +30,7 @@ src/
 State is managed globally using Zustand stores located in `src/store/`:
 
 - `useCrateStore.ts`: Manages the selected albums ("The Crate"), handles adding/removing/reordering, and manages IndexedDB persistence via `CrateStorageService`.
+- `useTracklistStore.ts`: Manages the imported raw tracklist (lines of text).
 - `useSettingsStore.ts`: Manages user settings, active API keys, and enabled providers. Persisted in localStorage.
 - `useThemeStore.ts`: Manages Light/Dark mode.
 

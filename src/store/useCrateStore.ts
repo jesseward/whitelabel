@@ -45,8 +45,13 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
         }),
       );
 
-      // 3. Update state with blobs
-      set({ selectedAlbums: albumsWithBlobs });
+      // 3. Update state with blobs without overwriting concurrent modifications
+      set((state) => ({
+        selectedAlbums: state.selectedAlbums.map((a) => {
+          const updated = albumsWithBlobs.find((b) => b.id === a.id);
+          return updated ? { ...a, localUrl: updated.localUrl } : a;
+        }),
+      }));
     } catch (error) {
       console.error("Hydration failed:", error);
       set({ isHydrated: true });
@@ -67,6 +72,11 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
     // 3. Background: Fetch Blob for performance
     const localUrl = await fetchImageBlob(album.url);
     if (localUrl) {
+      const exists = getStore().selectedAlbums.some((a) => a.id === album.id);
+      if (!exists) {
+        URL.revokeObjectURL(localUrl);
+        return;
+      }
       set((state) => ({
         selectedAlbums: state.selectedAlbums.map((a) =>
           a.id === album.id ? { ...a, localUrl } : a,
@@ -91,6 +101,13 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
       uniqueNewAlbums.map(async (album) => {
         const localUrl = await fetchImageBlob(album.url);
         if (localUrl) {
+          const exists = getStore().selectedAlbums.some(
+            (a) => a.id === album.id,
+          );
+          if (!exists) {
+            URL.revokeObjectURL(localUrl);
+            return;
+          }
           set((state) => ({
             selectedAlbums: state.selectedAlbums.map((a) =>
               a.id === album.id ? { ...a, localUrl } : a,
@@ -126,7 +143,11 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
 
   shuffleAlbums: () => {
     const { selectedAlbums } = getStore();
-    const shuffled = [...selectedAlbums].sort(() => Math.random() - 0.5);
+    const shuffled = [...selectedAlbums];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     set({ selectedAlbums: shuffled });
     CrateStorageService.save(shuffled).catch(console.error);
   },

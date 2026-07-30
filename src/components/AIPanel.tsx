@@ -45,8 +45,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({
       const imageSource = onGetImageSource();
       const result = await AIService.enhanceMosaic(imageSource, selectedStyle, {
         title,
-        fontStyle: selectedFontStyle || undefined,
-        layout: selectedLayout || undefined,
+        fontStyle: title && selectedFontStyle ? selectedFontStyle : undefined,
+        layout: title && selectedLayout ? selectedLayout : undefined,
       });
       onEnhanced(result);
     } catch (err) {
@@ -60,7 +60,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-2 mb-2">
-        <div className="bg-purple-500 p-1.5 rounded-lg text-white">
+        <div className="bg-indigo-500 p-1.5 rounded-lg text-white">
           <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
           </svg>
@@ -78,7 +78,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Sofa Syndicate Vol. 1"
-            className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+            className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
           />
         </div>
 
@@ -102,12 +102,12 @@ export const AIPanel: React.FC<AIPanelProps> = ({
                 }}
                 className={`w-full p-4 rounded-xl border text-left transition-all ${
                   selectedStyle?.id === style.id
-                    ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10"
+                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10"
                     : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                 }`}
               >
                 <p
-                  className={`text-sm font-bold ${selectedStyle?.id === style.id ? "text-purple-600 dark:text-purple-400" : ""}`}
+                  className={`text-sm font-bold ${selectedStyle?.id === style.id ? "text-indigo-600 dark:text-indigo-400" : ""}`}
                 >
                   {style.name}
                 </p>
@@ -220,7 +220,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({
         className={`w-full py-4 font-black rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] ${
           !selectedStyle || isProcessing || !hasKey
             ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-            : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-purple-500/20"
+            : "bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 shadow-indigo-500/20"
         }`}
       >
         {isProcessing ? (

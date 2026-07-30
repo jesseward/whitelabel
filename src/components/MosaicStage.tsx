@@ -59,7 +59,8 @@ export const MosaicStage: React.FC<MosaicStageProps> = ({
   const containerWidth = stageSize;
   const availableWidth = containerWidth - padding * 2 - gap * (columns - 1);
   const cellSize = availableWidth / columns;
-  const containerHeight = rows * cellSize + gap * (rows - 1) + padding * 2;
+  const containerHeight =
+    rows * cellSize + (rows > 0 ? gap * (rows - 1) : 0) + padding * 2;
 
   return (
     <Stage

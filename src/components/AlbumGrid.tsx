@@ -63,6 +63,16 @@ const AlbumCard = memo(
             : "ring-gray-200 dark:ring-gray-800"
         }`}
         style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
+        role="button"
+        tabIndex={0}
+        aria-pressed={isSelected}
+        aria-label={`Select ${album.album} by ${album.artist}`}
+        onKeyDown={(e) => {
+          if ((e.key === "Enter" || e.key === " ") && !isSelected) {
+            e.preventDefault();
+            onSelect(album);
+          }
+        }}
         onClick={() => !isSelected && onSelect(album)}
       >
         {hasError ? (

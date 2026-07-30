@@ -125,7 +125,7 @@ function App() {
               }}
               className={`py-4 px-6 text-xs font-black tracking-widest uppercase transition-colors border-b-2 ${
                 generatorMode === "mixtape" || view === "mixtape_preview"
-                  ? "border-purple-500 text-purple-600 dark:text-purple-400"
+                  ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
                   : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               }`}
             >
@@ -168,7 +168,7 @@ function App() {
                   value={mixtapeTitle}
                   onChange={(e) => setMixtapeTitle(e.target.value)}
                   placeholder="e.g. Summer Daze '94"
-                  className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                 />
               </div>
 
@@ -181,7 +181,7 @@ function App() {
                   value={mixtapeDj}
                   onChange={(e) => setMixtapeDj(e.target.value)}
                   placeholder="e.g. DJ Shadow"
-                  className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                 />
               </div>
 
@@ -194,7 +194,7 @@ function App() {
                   value={mixtapeExtra}
                   onChange={(e) => setMixtapeExtra(e.target.value)}
                   placeholder="e.g. Live at The Edge or Side A / B"
-                  className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                 />
               </div>
 
@@ -210,13 +210,13 @@ function App() {
                         onClick={() => setSelectedMixtapeStyle(style)}
                         className={`p-6 rounded-xl border text-left transition-all flex flex-col justify-between h-36 ${
                           selectedMixtapeStyle?.id === style.id
-                            ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10 ring-2 ring-purple-500/20"
+                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 ring-2 ring-indigo-500/20"
                             : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                         }`}
                       >
                         <div>
                           <p
-                            className={`text-base font-black ${selectedMixtapeStyle?.id === style.id ? "text-purple-600 dark:text-purple-400" : ""}`}
+                            className={`text-base font-black ${selectedMixtapeStyle?.id === style.id ? "text-indigo-600 dark:text-indigo-400" : ""}`}
                           >
                             {style.name}
                           </p>
@@ -225,7 +225,7 @@ function App() {
                           </p>
                         </div>
                         {selectedMixtapeStyle?.id === style.id && (
-                          <span className="text-[9px] bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-full font-black self-start uppercase tracking-wider">
+                          <span className="text-[9px] bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded-full font-black self-start uppercase tracking-wider">
                             Selected
                           </span>
                         )}
@@ -241,7 +241,7 @@ function App() {
                 className={`w-full py-4 font-black rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] ${
                   !mixtapeTitle || !selectedMixtapeStyle
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-purple-500/20"
+                    : "bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 shadow-indigo-500/20"
                 }`}
               >
                 <svg

@@ -78,7 +78,9 @@ export class ITunesProvider extends BaseProvider {
       return {
         albums,
         totalResults:
-          data.resultCount >= limit ? page * limit + limit : page * limit, // iTunes doesn't give total count easily with search
+          data.resultCount >= limit
+            ? (page + 1) * limit
+            : (page - 1) * limit + data.resultCount,
         page,
       };
     } catch (error) {

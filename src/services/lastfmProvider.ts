@@ -49,12 +49,13 @@ export class LastFmProvider extends BaseProvider {
       `${this.baseUrl}?${queryParams.toString()}`,
     );
 
-    const albums = data.results.albummatches.album.map(
+    const albumList = data.results?.albummatches?.album;
+    const albums = (Array.isArray(albumList) ? albumList : []).map(
       (album): AlbumArt => ({
         id: `${this.name}-${album.mbid || album.url}`,
         url:
-          album.image.find((img) => img.size === "extralarge")?.["#text"] ||
-          album.image[0]?.["#text"] ||
+          album.image?.find((img) => img.size === "extralarge")?.["#text"] ||
+          album.image?.[0]?.["#text"] ||
           "",
         artist: album.artist,
         album: album.name,

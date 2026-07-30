@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useSettingsStore } from "../store/useSettingsStore";
 
 const MODEL_NAME =
-  import.meta.env.VITE_GEMINI_MODEL || "gemini-3-pro-image-preview";
+  import.meta.env.VITE_GEMINI_MODEL || "gemini-3.1-flash-image";
 
 export interface AIStyle {
   id: string;
@@ -39,7 +39,7 @@ export const AI_STYLES: AIStyle[] = [
     name: "House & Electronic",
     description: "Clean, classic 1990s house vibe with light accents.",
     prompt:
-      'Apply a clean, to this music album art mosaic with a high-contrast minimalist filter with soft neon glows around the edges. Mimic the center label of a 12" vinyl with a circular mask. Apply a light cyan-to-purple gradient over the entire image at 10% opacity.',
+      'Apply a clean, to this music album art mosaic with a high-contrast minimalist filter with soft neon glows around the edges. Mimic the center label of a 12" vinyl with a circular mask. Apply a light cyan-to-blue gradient over the entire image at 10% opacity.',
     textInstructions:
       'Render the title in a geometric Sans-Serif font (like Inter or Helvetica). Use clean, spaced-out Monospace fonts for secondary details to give a "technical" look.',
     supportedLayouts: ["header", "footer", "sticker"],

@@ -42,12 +42,16 @@ export class DiscogsProvider extends BaseProvider {
     );
 
     const albums = data.results.map((result): AlbumArt => {
-      const [artist, ...albumParts] = result.title.split(" - ");
+      const parts = result.title.split(" - ");
+      const artist = parts.length > 1 ? parts[0].trim() : "Unknown Artist";
+      const album =
+        (parts.length > 1 ? parts.slice(1).join(" - ") : result.title).trim() ||
+        "Unknown Album";
       return {
         id: `${this.name}-${result.id}`,
         url: result.cover_image,
-        artist: artist?.trim() || "Unknown Artist",
-        album: albumParts.join(" - ")?.trim() || "Unknown Album",
+        artist,
+        album,
         provider: this.name,
       };
     });

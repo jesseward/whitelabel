@@ -33,11 +33,12 @@ WhiteLabel uses a multi-provider engine (Last.fm, Discogs, MusicBrainz, Apple iT
 
 ## Batch Import
 
-You can upload a text file (`.txt`) containing a list of songs or albums (e.g., "Artist - Title") to automatically populate your crate.
+You can upload a text file (`.txt`) containing a list of songs or albums (e.g., "Artist - Title") to populate your crate.
 
-- Click the **Import** button in the Crate panel.
-- The app randomly selects up to 16 lines from your file and attempts to find matches.
-- Useful for quickly generating a mosaic from a playlist export.
+- Click the **Import** (upload icon) button in the top header. This loads the tracklist into memory (indicated by a green dot on the button).
+- In the Crate panel, click **Load Tracklist** to search and load the albums.
+- The app searches for matches in the exact order of the tracklist.
+- Loading from a tracklist will clear your current crate to ensure the order matches the file.
 
 ## The Crate (Selection Management)
 
