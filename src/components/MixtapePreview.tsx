@@ -57,7 +57,7 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
         console.error("Failed to generate mixtape cover:", err);
         if (isMounted) {
           setError(
-            "Failed to generate mixtape cover. This feature requires access to the Gemini image-to-image model (gemini-3-pro-image-preview). Please verify your API key and model permissions in Settings.",
+            "Failed to generate mixtape cover. This feature requires access to the Gemini image-to-image model (gemini-3.1-flash-image). Please verify your API key and model permissions in Settings.",
           );
         }
       } finally {
@@ -90,7 +90,7 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
         let metadataString = title;
         if (dj) metadataString += ` by ${dj}`;
         if (extra) metadataString += ` (${extra})`;
-        exif[piexif.ExifIFD.UserComment] = metadataString;
+        exif[piexif.ExifIFD.UserComment] = "ASCII\0\0\0" + metadataString;
 
         const exifObj = { "0th": zeroth, Exif: exif, GPS: gps };
         const exifBytes = piexif.dump(exifObj);
@@ -115,7 +115,7 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 w-full aspect-[3/2] flex items-center justify-center relative overflow-hidden">
           {isLoading && (
             <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
               <p className="text-sm font-bold text-gray-500 dark:text-gray-400 animate-pulse">
                 GENERATING MIXTAPE COVER...
               </p>

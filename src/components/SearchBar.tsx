@@ -51,8 +51,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
             const hasKey =
               !needsKey ||
               (apiKey && apiKey.length > 0) ||
-              import.meta.env[`VITE_${p.id.toUpperCase()}_API_KEY`] ||
-              import.meta.env[`VITE_${p.id.toUpperCase()}_TOKEN`];
+              (p.id === "lastfm" && import.meta.env.VITE_LASTFM_API_KEY) ||
+              (p.id === "discogs" && import.meta.env.VITE_DISCOGS_TOKEN);
             const isDisabled = needsKey && !hasKey;
 
             return (

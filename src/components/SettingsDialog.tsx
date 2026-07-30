@@ -78,8 +78,8 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 const hasKey =
                   !needsKey ||
                   (apiKeys[apiKeysKey] && apiKeys[apiKeysKey].length > 0) ||
-                  import.meta.env[`VITE_${key.toUpperCase()}_API_KEY`] ||
-                  import.meta.env[`VITE_${key.toUpperCase()}_TOKEN`];
+                  (key === "lastfm" && import.meta.env.VITE_LASTFM_API_KEY) ||
+                  (key === "discogs" && import.meta.env.VITE_DISCOGS_TOKEN);
                 const isDisabled = needsKey && !hasKey;
 
                 return (
@@ -134,11 +134,13 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 </label>
                 <input
                   type="password"
-                  value={
-                    apiKeys.lastfm || import.meta.env.VITE_LASTFM_API_KEY || ""
-                  }
+                  value={apiKeys.lastfm}
                   onChange={(e) => setApiKey("lastfm", e.target.value)}
-                  placeholder="Enter your Last.fm API Key"
+                  placeholder={
+                    import.meta.env.VITE_LASTFM_API_KEY
+                      ? "Using VITE_LASTFM_API_KEY from .env"
+                      : "Enter your Last.fm API Key"
+                  }
                   className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
                 />
                 <p className="text-xs text-gray-400">
@@ -160,11 +162,13 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 </label>
                 <input
                   type="password"
-                  value={
-                    apiKeys.discogs || import.meta.env.VITE_DISCOGS_TOKEN || ""
-                  }
+                  value={apiKeys.discogs}
                   onChange={(e) => setApiKey("discogs", e.target.value)}
-                  placeholder="Enter your Discogs Token"
+                  placeholder={
+                    import.meta.env.VITE_DISCOGS_TOKEN
+                      ? "Using VITE_DISCOGS_TOKEN from .env"
+                      : "Enter your Discogs Token"
+                  }
                   className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
                 />
                 <p className="text-xs text-gray-400">
@@ -186,11 +190,13 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                 </label>
                 <input
                   type="password"
-                  value={
-                    apiKeys.gemini || import.meta.env.VITE_GEMINI_API_KEY || ""
-                  }
+                  value={apiKeys.gemini}
                   onChange={(e) => setApiKey("gemini", e.target.value)}
-                  placeholder="Enter your Gemini API Key"
+                  placeholder={
+                    import.meta.env.VITE_GEMINI_API_KEY
+                      ? "Using VITE_GEMINI_API_KEY from .env"
+                      : "Enter your Gemini API Key"
+                  }
                   className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
                 />
                 <p className="text-xs text-gray-400">

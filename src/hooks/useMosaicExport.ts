@@ -63,7 +63,7 @@ export const useMosaicExport = ({
         const gps: Record<number, string> = {};
 
         zeroth[piexif.ImageIFD.Software] = "WhiteLabel Album Art Creator";
-        exif[piexif.ExifIFD.UserComment] = metadataString;
+        exif[piexif.ExifIFD.UserComment] = "ASCII\0\0\0" + metadataString;
 
         const exifObj = { "0th": zeroth, Exif: exif, GPS: gps };
         const exifBytes = piexif.dump(exifObj);

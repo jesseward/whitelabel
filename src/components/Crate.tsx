@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AlbumArt } from "../types";
 import {
@@ -16,9 +16,9 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useCrateStore } from "../store/useCrateStore";
+import { useTracklistStore } from "../store/useTracklistStore";
 import { SortableAlbumItem } from "./SortableAlbumItem";
 import { SearchService } from "../services/searchService";
-import { SEARCH_CONFIG } from "../constants/searchConfig";
 
 interface CrateProps {
   onGenerate: () => void;
@@ -33,8 +33,8 @@ export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
     shuffleAlbums,
     addAlbums,
   } = useCrateStore();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const { tracks } = useTracklistStore();
+  const [isLoadingTracks, setIsLoadingTracks] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -53,59 +53,43 @@ export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
     }
   };
 
-  const processBatch = async (candidates: string[]) => {
-    setIsUploading(true);
-    const maxResults = SEARCH_CONFIG.BATCH_SIZE;
-
-    // Shuffle candidates to pick randomly
-    const shuffled = [...candidates].sort(() => Math.random() - 0.5);
-    const targetChunk = shuffled.slice(0, maxResults * 2);
-
+  const handleLoadTracklist = async () => {
+    setIsLoadingTracks(true);
     try {
-      const searchPromises = targetChunk.map((query) =>
-        SearchService.searchAll(query, 1).catch((err) => {
-          console.warn(`Failed to fetch for query: ${query}`, err);
-          return [] as AlbumArt[];
-        }),
-      );
-
-      const searchResults = await Promise.all(searchPromises);
-
+      const maxTracks = tracks.slice(0, 50);
       const matches: AlbumArt[] = [];
-      for (const results of searchResults) {
-        if (results && results.length > 0) {
-          matches.push(results[0]);
+      const seenIds = new Set<string>();
+
+      const batchSize = 5;
+      for (let i = 0; i < maxTracks.length; i += batchSize) {
+        const batch = maxTracks.slice(i, i + batchSize);
+        const searchResults = await Promise.all(
+          batch.map((query) =>
+            SearchService.searchAll(query, 1).catch((err) => {
+              console.warn(`Failed to fetch for query: ${query}`, err);
+              return [] as AlbumArt[];
+            }),
+          ),
+        );
+
+        for (const results of searchResults) {
+          if (results && results.length > 0) {
+            const album = results[0];
+            if (!seenIds.has(album.id)) {
+              seenIds.add(album.id);
+              matches.push(album);
+            }
+          }
         }
       }
 
-      const albumsToAdd = matches.slice(0, maxResults);
-      if (albumsToAdd.length > 0) {
-        await addAlbums(albumsToAdd);
+      if (matches.length > 0) {
+        clearCrate();
+        await addAlbums(matches);
       }
     } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      setIsLoadingTracks(false);
     }
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      if (text) {
-        const lines = text
-          .split(/\r?\n/)
-          .map((line) => line.trim())
-          .filter((line) => line.length > 0);
-        processBatch(lines);
-      }
-    };
-    reader.readAsText(file);
   };
 
   return (
@@ -124,41 +108,36 @@ export const Crate: React.FC<CrateProps> = ({ onGenerate }) => {
         </h2>
 
         <div className="flex gap-4 flex-wrap">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            className="hidden"
-            accept=".txt"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className={`text-[10px] uppercase font-black tracking-widest transition-colors flex items-center gap-1 ${isUploading ? "text-blue-500 animate-pulse" : "text-gray-400 hover:text-blue-500"}`}
-            title="Batch Upload Text File"
-          >
-            {isUploading ? (
-              "Loading..."
-            ) : (
-              <>
-                <svg
-                  width="12"
-                  height="12"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="3"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                  />
-                </svg>
-                Import
-              </>
-            )}
-          </button>
+          {tracks.length > 0 && (
+            <button
+              onClick={handleLoadTracklist}
+              disabled={isLoadingTracks}
+              className={`text-[10px] uppercase font-black tracking-widest transition-colors flex items-center gap-1 ${isLoadingTracks ? "text-blue-500 animate-pulse" : "text-gray-400 hover:text-blue-500"}`}
+              title="Load Albums from Tracklist"
+            >
+              {isLoadingTracks ? (
+                "Loading Tracks..."
+              ) : (
+                <>
+                  <svg
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="3"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  Load Tracklist ({tracks.length})
+                </>
+              )}
+            </button>
+          )}
 
           {selectedAlbums.length > 1 && (
             <button

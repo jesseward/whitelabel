@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useThemeStore } from "../store/useThemeStore";
+import { useTracklistStore } from "../store/useTracklistStore";
 import type { View } from "../types";
 
 interface HeaderProps {
@@ -14,6 +15,29 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
 }) => {
   const { theme, toggleTheme } = useThemeStore();
+  const { tracks, setTracks } = useTracklistStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (text) {
+        const lines = text
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0);
+        setTracks(lines);
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   return (
     <header className="max-w-7xl mx-auto mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-4 border-black dark:border-white pb-6">
@@ -21,6 +45,12 @@ export const Header: React.FC<HeaderProps> = ({
         <div
           className="flex items-center gap-3 cursor-pointer group w-fit"
           onClick={() => setView("search")}
+          role="button"
+          tabIndex={0}
+          aria-label="Return to Search"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") setView("search");
+          }}
         >
           <div className="relative w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite] group-hover:animate-[spin_2s_linear_infinite]">
             <div className="w-6 h-6 bg-white dark:bg-black rounded-full absolute" />
@@ -38,6 +68,39 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-4">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          className="hidden"
+          accept=".txt"
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all shadow-sm group relative"
+          title="Import Tracklist (.txt)"
+          aria-label="Import Tracklist"
+        >
+          <svg
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            className="text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+            />
+          </svg>
+          {tracks.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-950" />
+          )}
+        </button>
+
         <button
           onClick={() => setView("help")}
           className="p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all shadow-sm group"
