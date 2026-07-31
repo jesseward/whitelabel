@@ -322,16 +322,14 @@ const createMockCassette = (
       ctx.fillStyle = "#a5f3fc";
       ctx.font = "bold 20px 'Impact', sans-serif";
       ctx.fillText(`DJ: ${options.dj.toUpperCase()}`, 300, textY);
-      textY += 30;
     }
 
     // Subtitle / Extra info
     ctx.fillStyle = "#06b6d4";
     ctx.font = "12px monospace";
-    let extraY = 290;
+    const extraY = 290;
     if (options?.extra) {
       ctx.fillText(options.extra.toUpperCase(), 300, extraY);
-      extraY += 20;
     }
 
     // Simple Logos

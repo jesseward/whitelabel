@@ -28,7 +28,7 @@ export class MusicBrainzProvider extends BaseProvider {
   async search(params: SearchParams, page = 1): Promise<SearchResult> {
     const offset = (page - 1) * 30;
 
-    let luceneQuery = "";
+    let luceneQuery: string;
     if (params.artist && params.album) {
       luceneQuery = `artistname:"${params.artist}" AND release:"${params.album}"`;
     } else if (params.artist) {
