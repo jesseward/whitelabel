@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import pThrottle from "p-throttle";
 import type { AlbumArt } from "../types";
 import { getProxiedUrl } from "../utils/imageProxy";
 import { CrateStorageService } from "../services/crateStorageService";
@@ -15,78 +16,76 @@ interface CrateState {
   hydrate: () => Promise<void>;
 }
 
-const fetchImageBlob = async (url: string): Promise<string | null> => {
-  try {
-    const res = await fetch(getProxiedUrl(url, "medium"));
-    if (!res.ok) {
-      throw new Error(`Image request failed with status ${res.status}`);
-    }
-    const blob = await res.blob();
-    return URL.createObjectURL(blob);
-  } catch (error) {
-    console.warn(`Failed to cache image for ${url}:`, error);
-    return null;
-  }
-};
+// Cap the request rate so a large crate doesn't hit wsrv.nl all at once.
+const throttleImageFetch = pThrottle({ limit: 8, interval: 1000 });
 
-export const useCrateStore = create<CrateState>((set, getStore) => ({
-  selectedAlbums: [],
-  isHydrated: false,
-
-  hydrate: async () => {
+const fetchImageBlob = throttleImageFetch(
+  async (url: string): Promise<string | null> => {
     try {
-      const savedAlbums = await CrateStorageService.load();
-
-      // 1. Set state immediately with saved data (showing placeholders/remote URLs)
-      set({ selectedAlbums: savedAlbums, isHydrated: true });
-
-      // 2. Background hydrate blobs for better performance
-      const albumsWithBlobs = await Promise.all(
-        savedAlbums.map(async (album) => {
-          const localUrl = await fetchImageBlob(album.url);
-          return localUrl ? { ...album, localUrl } : album;
-        }),
-      );
-
-      // 3. Update state with blobs without overwriting concurrent modifications
-      set((state) => ({
-        selectedAlbums: state.selectedAlbums.map((a) => {
-          const updated = albumsWithBlobs.find((b) => b.id === a.id);
-          return updated ? { ...a, localUrl: updated.localUrl } : a;
-        }),
-      }));
+      const res = await fetch(getProxiedUrl(url, "medium"));
+      if (!res.ok) {
+        throw new Error(`Image request failed with status ${res.status}`);
+      }
+      const blob = await res.blob();
+      return URL.createObjectURL(blob);
     } catch (error) {
-      console.error("Hydration failed:", error);
-      set({ isHydrated: true });
+      console.warn(`Failed to cache image for ${url}:`, error);
+      return null;
     }
   },
+);
 
-  addAlbum: async (album) => {
-    const { selectedAlbums } = getStore();
-    if (selectedAlbums.find((a) => a.id === album.id)) return;
+// Shared by hydrate/addAlbums. Revokes blobs for albums removed while the
+// fetch was in flight and any blob that gets replaced.
+const cacheAlbumBlobs = async (
+  albums: AlbumArt[],
+  set: (fn: (state: CrateState) => Partial<CrateState>) => void,
+  get: () => CrateState,
+): Promise<void> => {
+  await Promise.all(
+    albums.map(async (album) => {
+      const localUrl = await fetchImageBlob(album.url);
+      if (!localUrl) return;
 
-    // 1. Optimistic Update: Add immediately
-    const newAlbums = [...selectedAlbums, album];
-    set({ selectedAlbums: newAlbums });
-
-    // 2. Persist to DB (async, doesn't block UI)
-    CrateStorageService.save(newAlbums).catch(console.error);
-
-    // 3. Background: Fetch Blob for performance
-    const localUrl = await fetchImageBlob(album.url);
-    if (localUrl) {
-      const exists = getStore().selectedAlbums.some((a) => a.id === album.id);
-      if (!exists) {
+      const current = get().selectedAlbums.find((a) => a.id === album.id);
+      if (!current) {
         URL.revokeObjectURL(localUrl);
         return;
       }
+      if (current.localUrl) URL.revokeObjectURL(current.localUrl);
       set((state) => ({
         selectedAlbums: state.selectedAlbums.map((a) =>
           a.id === album.id ? { ...a, localUrl } : a,
         ),
       }));
-    }
+    }),
+  );
+};
+
+// Dev StrictMode (and any re-mount) calls hydrate twice; share one run.
+let hydrating: Promise<void> | null = null;
+
+export const useCrateStore = create<CrateState>((set, getStore) => ({
+  selectedAlbums: [],
+  isHydrated: false,
+
+  hydrate: () => {
+    hydrating ??= (async () => {
+      try {
+        const savedAlbums = await CrateStorageService.load();
+
+        // Show saved data immediately (remote URLs), then cache blobs.
+        set({ selectedAlbums: savedAlbums, isHydrated: true });
+        await cacheAlbumBlobs(savedAlbums, set, getStore);
+      } catch (error) {
+        console.error("Hydration failed:", error);
+        set({ isHydrated: true });
+      }
+    })();
+    return hydrating;
   },
+
+  addAlbum: (album) => getStore().addAlbums([album]),
 
   addAlbums: async (albums) => {
     const { selectedAlbums } = getStore();
@@ -99,26 +98,7 @@ export const useCrateStore = create<CrateState>((set, getStore) => ({
     set({ selectedAlbums: newAlbums });
     CrateStorageService.save(newAlbums).catch(console.error);
 
-    // Fetch blobs
-    await Promise.all(
-      uniqueNewAlbums.map(async (album) => {
-        const localUrl = await fetchImageBlob(album.url);
-        if (localUrl) {
-          const exists = getStore().selectedAlbums.some(
-            (a) => a.id === album.id,
-          );
-          if (!exists) {
-            URL.revokeObjectURL(localUrl);
-            return;
-          }
-          set((state) => ({
-            selectedAlbums: state.selectedAlbums.map((a) =>
-              a.id === album.id ? { ...a, localUrl } : a,
-            ),
-          }));
-        }
-      }),
-    );
+    await cacheAlbumBlobs(uniqueNewAlbums, set, getStore);
   },
 
   removeAlbum: (albumId) => {

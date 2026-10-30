@@ -144,7 +144,7 @@ Update after every commit. Format: `[ ] item – status/commit`.
 - [x] 23 VITE\_\* warning in README – 1ea519a
 - [x] 28 README typos – 1ea519a; ARCHITECTURE.md refreshed – see latest commit
 - [x] `.nvmrc` (20) – 1ea519a. CI still hard-codes node 20; switching to `node-version-file` is left to item 27
-      **Phase 3 – hardening:** [ ] 8 [ ] 9 [ ] 10 [ ] 13 [ ] 15 [ ] 16
+      **Phase 3 – hardening:** [x] 8 throttled blob fetches (8/sec via p-throttle) – see commit [x] 9 idempotent hydrate + blob revoke on discard/replace – same commit [ ] 10 [ ] 13 [ ] 15 [ ] 16
       **Phase 4 – features:** [ ] 6 [ ] 14
       **Phase 5 – refactor:** [ ] 17 [ ] 18 [ ] 19 [ ] 20 [ ] 21 [ ] 25
       **Phase 6 – polish:** [ ] 24 [ ] 26 [ ] 27
@@ -158,3 +158,4 @@ Session log:
 - 2026-10-30: Phase 1 marked COMPLETED after owner browser check (`Say "Hi"` search works). Next: Phase 2 (items 5, 11, 22, 23, 28); open decision on item 5 (docs fix vs session-only keys toggle) and `.nvmrc`.
 - 2026-10-30: Phase 2 implemented. lint, tsc -b and 49 tests pass. Owner browser checks: Settings > API Keys text, Mixtape Generator with no Gemini key shows the amber preview banner.
 - 2026-10-30: Phase 2 COMPLETED and owner-verified. Next: Phase 3 (items 8, 9, 10, 13, 15, 16). Plan: start with a short design proposal for 13/15/16 (image pipeline) before coding; do 8+9 together, then 10. Shell note: run `. ~/.nvm/nvm.sh` before npm.
+- 2026-10-30: Phase 3 started. Items 8+9 done in `useCrateStore` (shared `cacheAlbumBlobs`, `addAlbum` now delegates to `addAlbums`, so part of item 19 is also done). lint, tsc, 52 tests pass. Next: item 10 (`MixtapePreview` abort/guard), then design proposal for 13/15/16.
