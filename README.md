@@ -1,7 +1,7 @@
 # WhiteLabel
 
 > [!TIP]
-> Application is deployed to https://www.jesseward.com/whitelabel . If you wish to use Discogs or LastFM API you will need to supply your own keys. The application is a static page hosted on GitHub pages. Keys are stored in your browser session only and only used during the tranmission of the API request..
+> Application is deployed to https://www.jesseward.com/whitelabel . If you wish to use Discogs or LastFM API you will need to supply your own keys. The application is a static page hosted on GitHub pages. Keys are saved in your browser's localStorage (they persist until you clear site data) and are only sent to the provider's own API when a request is made. There is no WhiteLabel server.
 
 WhiteLabel is a client-side web application allowing you to create mosciacs from album art. You can optionally apply effects using Gemini's Nano Banana model, for example ..
 

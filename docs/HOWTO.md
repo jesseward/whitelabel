@@ -12,7 +12,7 @@ WhiteLabel is designed to run entirely in your browser. To enable search functio
    - **Last.fm**: Required for the most comprehensive album art search.
    - **Discogs**: Essential for vinyl and electronic music releases.
    - **Gemini**: Required for AI style transfers and enhancements.
-4. Keys are saved securely in your browser's local storage and are never sent to our servers.
+4. Keys are saved in your browser's local storage and persist until you clear site data. They are only sent to the matching provider's API (there is no WhiteLabel server). Anyone with access to your browser profile can read them, so avoid entering keys on shared machines.
 
 You can also toggle specific providers on or off in the **Data Providers** tab.
 
