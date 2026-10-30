@@ -136,7 +136,13 @@ Update after every commit. Format: `[ ] item – status/commit`.
 - [x] 7 blank/whitespace search – e4dfbfd
 - [x] 12 iTunes errors propagate – e8afa12
 - [x] 29 (found in owner testing) relevance filter dropped results for queries containing quotes/punctuation – see commit below
-**Phase 2 – honest behaviour:** [ ] 5 [ ] 11 [ ] 22 [ ] 23 [ ] 28
+**Phase 2 – honest behaviour (code done, awaiting owner's browser check):**
+- [x] 5 key-storage docs corrected (README, HOWTO, Settings dialog) – 0499d2c (chose docs fix, not session-only toggle)
+- [x] 11 mock mode kept, "preview" banner in MixtapePreview – 01e6ca7
+- [~] 22 error text uses MODEL_NAME – 01e6ca7; default model id `gemini-3.1-flash-image` is UNVERIFIED, owner to confirm it is valid
+- [x] 23 VITE_* warning in README – 1ea519a
+- [x] 28 README typos – 1ea519a; ARCHITECTURE.md refreshed – see latest commit
+- [x] `.nvmrc` (20) – 1ea519a. CI still hard-codes node 20; switching to `node-version-file` is left to item 27
 **Phase 3 – hardening:** [ ] 8 [ ] 9 [ ] 10 [ ] 13 [ ] 15 [ ] 16
 **Phase 4 – features:** [ ] 6 [ ] 14
 **Phase 5 – refactor:** [ ] 17 [ ] 18 [ ] 19 [ ] 20 [ ] 21 [ ] 25
@@ -148,3 +154,4 @@ Session log:
 - 2026-10-30: Node 20.20.2 installed via nvm (`. ~/.nvm/nvm.sh` before npm in Claude's shell). Phase 1 verified: lint clean, 41/41 tests pass, `tsc -b` + build succeed. Browser click-check still owner's. Next: Phase 2.
 - 2026-10-30: Owner click-test of `Say "Hi"` returned nothing. Root cause: general-query word filter in `searchAll` matched punctuation literally (pre-existing bug, not a Phase 1 regression). Fixed with `matchesAllWords`. iTunes 429 seen locally is plain rate limiting; isolated by `allSettled`. Also added `make run`.
 - 2026-10-30: Phase 1 marked COMPLETED after owner browser check (`Say "Hi"` search works). Next: Phase 2 (items 5, 11, 22, 23, 28); open decision on item 5 (docs fix vs session-only keys toggle) and `.nvmrc`.
+- 2026-10-30: Phase 2 implemented. lint, tsc -b and 49 tests pass. Owner browser checks: Settings > API Keys text, Mixtape Generator with no Gemini key shows the amber preview banner.
