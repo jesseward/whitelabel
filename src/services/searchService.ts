@@ -55,9 +55,10 @@ export const SearchService = {
     page = 1,
     enabledProviders?: Record<string, boolean>,
   ): Promise<AlbumArt[]> => {
-    if (!rawQuery) return [];
+    const trimmedQuery = rawQuery.trim();
+    if (!trimmedQuery) return [];
 
-    const searchParams = SearchService.parseQuery(rawQuery);
+    const searchParams = SearchService.parseQuery(trimmedQuery);
 
     const activeProviders = providers.filter(
       ({ provider }) => !enabledProviders || enabledProviders[provider.name],

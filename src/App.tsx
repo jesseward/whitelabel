@@ -138,7 +138,7 @@ function App() {
           generatorMode === "mosaic" ? (
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               <div className="lg:col-span-3">
-                <SearchBar onSearch={setSearchQuery} />
+                <SearchBar onSearch={(query) => setSearchQuery(query.trim())} />
 
                 {isError && (
                   <div className="bg-red-900/10 border border-red-500/50 text-red-600 dark:text-red-400 p-4 rounded-xl mb-6">

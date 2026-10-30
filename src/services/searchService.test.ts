@@ -32,4 +32,11 @@ describe("SearchService", () => {
       expect(result.query).toBe("something else");
     });
   });
+
+  describe("searchAll", () => {
+    it("returns no results for a blank or whitespace-only query", async () => {
+      expect(await SearchService.searchAll("")).toEqual([]);
+      expect(await SearchService.searchAll("   ")).toEqual([]);
+    });
+  });
 });
