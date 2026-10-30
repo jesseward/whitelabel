@@ -34,7 +34,7 @@ The project includes a `Makefile` to simplify common development tasks.
 make install
 
 # Start local development server
-npm run dev
+make run
 
 # Run linter
 make lint
