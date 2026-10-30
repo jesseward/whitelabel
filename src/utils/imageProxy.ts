@@ -1,3 +1,5 @@
+import pThrottle from "p-throttle";
+
 /**
  * Centralized utility for image proxying and optimization.
  * Uses wsrv.nl to bypass CORS and provide resized, optimized images.
@@ -45,6 +47,9 @@ const hostOf = (url: string): string => {
   }
 };
 
+// Cap the request rate so a large crate doesn't hit hosts all at once.
+const throttleImageFetch = pThrottle({ limit: 8, interval: 1000 });
+
 const fetchImage = async (requestUrl: string): Promise<Blob> => {
   const res = await fetch(requestUrl);
   if (!res.ok) {
@@ -63,22 +68,25 @@ const fetchImage = async (requestUrl: string): Promise<Blob> => {
  * when the direct request is blocked. HTTP errors do not trigger the fallback.
  * Direct fetches return the source resolution regardless of `size`.
  */
-export const fetchImageBlobData = async (
-  url: string,
-  size: ImageSize = "medium",
-): Promise<Blob> => {
-  const host = hostOf(url);
-  if (!proxyOnlyHosts.has(host)) {
-    try {
-      return await fetchImage(url);
-    } catch (error) {
-      // fetch rejects with TypeError for network/CORS failures.
-      if (!(error instanceof TypeError)) throw error;
-      proxyOnlyHosts.add(host);
+export const fetchImageBlobData = throttleImageFetch(
+  async (url: string, size: ImageSize = "medium"): Promise<Blob> => {
+    const host = hostOf(url);
+    if (!proxyOnlyHosts.has(host)) {
+      try {
+        return await fetchImage(url);
+      } catch (error) {
+        // fetch rejects with TypeError for network/CORS failures.
+        if (!(error instanceof TypeError)) throw error;
+        proxyOnlyHosts.add(host);
+      }
     }
-  }
-  return fetchImage(getProxiedUrl(url, size));
-};
+    return fetchImage(getProxiedUrl(url, size));
+  },
+);
+
+/** True when images from this URL's host can only be loaded via the proxy. */
+export const needsProxy = (url: string): boolean =>
+  proxyOnlyHosts.has(hostOf(url));
 
 /** Test helper: forget which hosts need the proxy. */
 export const resetProxyHosts = (): void => proxyOnlyHosts.clear();

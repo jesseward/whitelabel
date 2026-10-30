@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import pThrottle from "p-throttle";
 import type { AlbumArt } from "../types";
 import { fetchImageBlobData } from "../utils/imageProxy";
 import { CrateStorageService } from "../services/crateStorageService";
@@ -16,20 +15,15 @@ interface CrateState {
   hydrate: () => Promise<void>;
 }
 
-// Cap the request rate so a large crate doesn't hit wsrv.nl all at once.
-const throttleImageFetch = pThrottle({ limit: 8, interval: 1000 });
-
-const fetchImageBlob = throttleImageFetch(
-  async (url: string): Promise<string | null> => {
-    try {
-      const blob = await fetchImageBlobData(url, "medium");
-      return URL.createObjectURL(blob);
-    } catch (error) {
-      console.warn(`Failed to cache image for ${url}:`, error);
-      return null;
-    }
-  },
-);
+const fetchImageBlob = async (url: string): Promise<string | null> => {
+  try {
+    const blob = await fetchImageBlobData(url, "medium");
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.warn(`Failed to cache image for ${url}:`, error);
+    return null;
+  }
+};
 
 // Shared by hydrate/addAlbums. Revokes blobs for albums removed while the
 // fetch was in flight and any blob that gets replaced.
