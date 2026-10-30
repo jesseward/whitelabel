@@ -400,6 +400,49 @@ export const buildEnhancePrompt = (
   return finalPrompt;
 };
 
+interface GeminiResponseLike {
+  candidates?: {
+    finishReason?: string;
+    content?: {
+      parts?: {
+        text?: string;
+        inlineData?: { mimeType: string; data: string };
+      }[];
+    };
+  }[];
+  promptFeedback?: { blockReason?: string };
+}
+
+/**
+ * Finds the generated image in a Gemini response. The image part is not
+ * guaranteed to be first; models may emit a text part before it.
+ */
+export const extractImageDataUrl = (response: GeminiResponseLike): string => {
+  if (response.promptFeedback?.blockReason) {
+    throw new Error(
+      `Gemini blocked the request: ${response.promptFeedback.blockReason}`,
+    );
+  }
+
+  const candidate = response.candidates?.[0];
+  if (!candidate) {
+    throw new Error("No candidates returned from Gemini");
+  }
+
+  const imagePart = candidate.content?.parts?.find((part) => part.inlineData);
+  if (!imagePart?.inlineData) {
+    const reason = candidate.finishReason
+      ? ` (finish reason: ${candidate.finishReason})`
+      : "";
+    throw new Error(
+      `No image data found in response${reason}. The model '${MODEL_NAME}' may not support image-to-image output. Ensure you are using a model that supports image generation/multimodal output.`,
+    );
+  }
+
+  const { mimeType, data } = imagePart.inlineData;
+  return `data:${mimeType};base64,${data}`;
+};
+
 export const AIService = {
   enhanceMosaic: async (
     base64Image: string,
@@ -437,22 +480,6 @@ export const AIService = {
       },
     ]);
 
-    const response = result.response;
-
-    if (!response.candidates || response.candidates.length === 0) {
-      throw new Error("No candidates returned from Gemini");
-    }
-
-    const firstCandidate = response.candidates[0];
-    const firstPart = firstCandidate.content.parts[0];
-
-    if (!firstPart || !firstPart.inlineData) {
-      throw new Error(
-        `No image data found in response. The model '${MODEL_NAME}' may not support image-to-image output. Ensure you are using a model that supports image generation/multimodal output.`,
-      );
-    }
-
-    const { mimeType, data } = firstPart.inlineData;
-    return `data:${mimeType};base64,${data}`;
+    return extractImageDataUrl(result.response);
   },
 };

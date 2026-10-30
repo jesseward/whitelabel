@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   AIService,
   buildEnhancePrompt,
+  extractImageDataUrl,
   AI_STYLES,
   FONT_OPTIONS,
   LAYOUT_OPTIONS,
@@ -138,5 +139,42 @@ describe("AIService", () => {
       expect(result).toBe("data:image/png;base64,mocked_cassette");
       expect(result).not.toBe(inputImage);
     });
+  });
+});
+
+describe("extractImageDataUrl", () => {
+  const image = { inlineData: { mimeType: "image/png", data: "AAAA" } };
+
+  it("returns the image when it is the first part", () => {
+    const res = { candidates: [{ content: { parts: [image] } }] };
+    expect(extractImageDataUrl(res)).toBe("data:image/png;base64,AAAA");
+  });
+
+  it("finds the image after a leading text part", () => {
+    const res = {
+      candidates: [{ content: { parts: [{ text: "Here you go" }, image] } }],
+    };
+    expect(extractImageDataUrl(res)).toBe("data:image/png;base64,AAAA");
+  });
+
+  it("reports a blocked prompt", () => {
+    expect(() =>
+      extractImageDataUrl({ promptFeedback: { blockReason: "SAFETY" } }),
+    ).toThrow("SAFETY");
+  });
+
+  it("throws when there are no candidates", () => {
+    expect(() => extractImageDataUrl({ candidates: [] })).toThrow(
+      "No candidates",
+    );
+  });
+
+  it("includes the finish reason when no image is present", () => {
+    const res = {
+      candidates: [
+        { finishReason: "IMAGE_SAFETY", content: { parts: [{ text: "no" }] } },
+      ],
+    };
+    expect(() => extractImageDataUrl(res)).toThrow("IMAGE_SAFETY");
   });
 });
