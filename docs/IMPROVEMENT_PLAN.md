@@ -135,6 +135,7 @@ Update after every commit. Format: `[ ] item – status/commit`.
 - [x] 4 MusicBrainz phrase escaping – 0de0e95
 - [x] 7 blank/whitespace search – e4dfbfd
 - [x] 12 iTunes errors propagate – e8afa12
+- [x] 29 (found in owner testing) relevance filter dropped results for queries containing quotes/punctuation – see commit below
 **Phase 2 – honest behaviour:** [ ] 5 [ ] 11 [ ] 22 [ ] 23 [ ] 28
 **Phase 3 – hardening:** [ ] 8 [ ] 9 [ ] 10 [ ] 13 [ ] 15 [ ] 16
 **Phase 4 – features:** [ ] 6 [ ] 14
@@ -145,3 +146,4 @@ Session log:
 - 2026-10-30: review done, plan written, working agreements agreed. No code changed yet.
 - 2026-10-30: Phase 1 implemented (5 commits on `improvements`). Node/npm are NOT installed on this machine, so nothing has been linted, type-checked or tested; owner to run `npm ci && npm run lint && npm test -- --run && npm run build`. Existing store test mocks were updated to include `ok: true`. Not yet done: Phase 2.
 - 2026-10-30: Node 20.20.2 installed via nvm (`. ~/.nvm/nvm.sh` before npm in Claude's shell). Phase 1 verified: lint clean, 41/41 tests pass, `tsc -b` + build succeed. Browser click-check still owner's. Next: Phase 2.
+- 2026-10-30: Owner click-test of `Say "Hi"` returned nothing. Root cause: general-query word filter in `searchAll` matched punctuation literally (pre-existing bug, not a Phase 1 regression). Fixed with `matchesAllWords`. iTunes 429 seen locally is plain rate limiting; isolated by `allSettled`. Also added `make run`.

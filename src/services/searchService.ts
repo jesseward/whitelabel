@@ -21,6 +21,23 @@ const providers: {
   throttle: pThrottle(provider.rateLimit),
 }));
 
+// Lowercase and replace punctuation with spaces so that a query like
+// `Say "Hi"` matches a result titled `Say Hi` (and vice versa).
+const normalizeForMatch = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+
+/** True when every word of the query appears somewhere in the haystack. */
+export const matchesAllWords = (haystack: string, query: string): boolean => {
+  const normalizedHaystack = normalizeForMatch(haystack);
+  return normalizeForMatch(query)
+    .split(" ")
+    .filter((word) => word.length > 0)
+    .every((word) => normalizedHaystack.includes(word));
+};
+
 export const SearchService = {
   parseQuery(rawQuery: string): SearchParams {
     const params: SearchParams = { query: rawQuery };
@@ -99,14 +116,11 @@ export const SearchService = {
 
       // Flexible word-based matching for general queries
       if (!searchParams.artist && !searchParams.album) {
-        const queryWords = searchParams.query
-          .toLowerCase()
-          .split(/\s+/)
-          .filter((w) => w.length > 0);
-        const combined = `${artistLower} ${albumLower}`;
-
         // Ensure every word in the query exists somewhere in the result
-        const isRelevant = queryWords.every((word) => combined.includes(word));
+        const isRelevant = matchesAllWords(
+          `${album.artist} ${album.album}`,
+          searchParams.query,
+        );
         if (!isRelevant) return false;
       }
 
