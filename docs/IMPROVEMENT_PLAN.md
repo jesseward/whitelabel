@@ -128,7 +128,7 @@ Open question for the owner: should the mock cassette mode remain (as a demo for
 
 Update after every commit. Format: `[ ] item – status/commit`.
 
-**Phase 1 – correctness (done and verified):**
+**Phase 1 – correctness (COMPLETED, owner browser-verified 2026-10-30):**
 - [x] 1 Gemini image part lookup – 55935f3
 - [x] 2 failed image fetch no longer cached – 7afe5de
 - [x] 3 Last.fm error bodies – 0de0e95 (shared commit with 4)
@@ -147,3 +147,4 @@ Session log:
 - 2026-10-30: Phase 1 implemented (5 commits on `improvements`). Node/npm are NOT installed on this machine, so nothing has been linted, type-checked or tested; owner to run `npm ci && npm run lint && npm test -- --run && npm run build`. Existing store test mocks were updated to include `ok: true`. Not yet done: Phase 2.
 - 2026-10-30: Node 20.20.2 installed via nvm (`. ~/.nvm/nvm.sh` before npm in Claude's shell). Phase 1 verified: lint clean, 41/41 tests pass, `tsc -b` + build succeed. Browser click-check still owner's. Next: Phase 2.
 - 2026-10-30: Owner click-test of `Say "Hi"` returned nothing. Root cause: general-query word filter in `searchAll` matched punctuation literally (pre-existing bug, not a Phase 1 regression). Fixed with `matchesAllWords`. iTunes 429 seen locally is plain rate limiting; isolated by `allSettled`. Also added `make run`.
+- 2026-10-30: Phase 1 marked COMPLETED after owner browser check (`Say "Hi"` search works). Next: Phase 2 (items 5, 11, 22, 23, 28); open decision on item 5 (docs fix vs session-only keys toggle) and `.nvmrc`.
