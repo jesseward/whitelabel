@@ -1,4 +1,4 @@
-import { useState, memo } from "react";
+import { useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AlbumArt } from "../types";
 import { useCrateStore } from "../store/useCrateStore";
@@ -14,10 +14,12 @@ const AlbumCard = memo(
   ({
     album,
     onSelect,
+    onBroken,
     isSelected,
   }: {
     album: AlbumArt;
     onSelect: (album: AlbumArt) => void;
+    onBroken: (albumId: string) => void;
     isSelected: boolean;
   }) => {
     const [hasError, setHasError] = useState(false);
@@ -100,7 +102,13 @@ const AlbumCard = memo(
             alt={`${album.artist} - ${album.album}`}
             className={`aspect-square w-full object-cover transition-all duration-500 ${isSelected ? "grayscale-[0.5] blur-[1px]" : ""}`}
             loading="lazy"
-            onError={() => setHasError(true)}
+            onError={() => {
+              // Cover Art Archive 404s are definitive and common, so drop
+              // those tiles. Other providers keep a "No Artwork" placeholder
+              // since a failure there may be transient.
+              if (album.provider === "musicbrainz") onBroken(album.id);
+              else setHasError(true);
+            }}
           />
         )}
 
@@ -177,6 +185,11 @@ export const AlbumGrid: React.FC<AlbumGridProps> = ({
 }) => {
   const selectedAlbums = useCrateStore((state) => state.selectedAlbums);
   const selectedIds = new Set(selectedAlbums.map((a) => a.id));
+  const [brokenIds, setBrokenIds] = useState<Set<string>>(new Set());
+  const markBroken = useCallback(
+    (id: string) => setBrokenIds((prev) => new Set(prev).add(id)),
+    [],
+  );
 
   if (isLoading) {
     return (
@@ -197,14 +210,17 @@ export const AlbumGrid: React.FC<AlbumGridProps> = ({
       className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
     >
       <AnimatePresence mode="popLayout">
-        {albums.map((album) => (
-          <AlbumCard
-            key={album.id}
-            album={album}
-            onSelect={onSelect}
-            isSelected={selectedIds.has(album.id)}
-          />
-        ))}
+        {albums
+          .filter((album) => !brokenIds.has(album.id))
+          .map((album) => (
+            <AlbumCard
+              key={album.id}
+              album={album}
+              onSelect={onSelect}
+              onBroken={markBroken}
+              isSelected={selectedIds.has(album.id)}
+            />
+          ))}
       </AnimatePresence>
     </motion.div>
   );

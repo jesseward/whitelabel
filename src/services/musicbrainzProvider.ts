@@ -20,6 +20,11 @@ interface MusicBrainzSearchResponse {
   releases: MusicBrainzRelease[];
 }
 
+// Characters with special meaning in Lucene query syntax. Inside a quoted
+// phrase only `\` and `"` matter, so escape those and leave the rest literal.
+const escapePhrase = (value: string): string =>
+  value.replace(/[\\"]/g, "\\$&");
+
 export class MusicBrainzProvider extends BaseProvider {
   name = "musicbrainz" as const;
   rateLimit = { limit: 1, interval: 1000 };
@@ -28,15 +33,19 @@ export class MusicBrainzProvider extends BaseProvider {
   async search(params: SearchParams, page = 1): Promise<SearchResult> {
     const offset = (page - 1) * 30;
 
+    const artist = params.artist && escapePhrase(params.artist);
+    const album = params.album && escapePhrase(params.album);
+
     let luceneQuery: string;
-    if (params.artist && params.album) {
-      luceneQuery = `artistname:"${params.artist}" AND release:"${params.album}"`;
-    } else if (params.artist) {
-      luceneQuery = `artistname:"${params.artist}"`;
-    } else if (params.album) {
-      luceneQuery = `release:"${params.album}"`;
+    if (artist && album) {
+      luceneQuery = `artistname:"${artist}" AND release:"${album}"`;
+    } else if (artist) {
+      luceneQuery = `artistname:"${artist}"`;
+    } else if (album) {
+      luceneQuery = `release:"${album}"`;
     } else {
-      luceneQuery = `artistname:"${params.query}" OR release:"${params.query}"`;
+      const query = escapePhrase(params.query);
+      luceneQuery = `artistname:"${query}" OR release:"${query}"`;
     }
 
     const queryParams = new URLSearchParams({

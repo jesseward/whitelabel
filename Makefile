@@ -1,6 +1,6 @@
 # Makefile for WhiteLabel
 
-.PHONY: all install lint test build clean
+.PHONY: all install run lint format test build clean
 
 # Default target
 all: install lint test build
@@ -8,6 +8,10 @@ all: install lint test build
 # Install dependencies
 install:
 	npm install
+
+# Start the development server
+run:
+	npm run dev
 
 # Run linter
 lint:

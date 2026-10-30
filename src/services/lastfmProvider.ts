@@ -16,7 +16,10 @@ interface LastFmAlbumMatch {
 }
 
 interface LastFmSearchResponse {
-  results: {
+  // Last.fm reports errors (bad key, rate limit) as HTTP 200 with these fields
+  error?: number;
+  message?: string;
+  results?: {
     "opensearch:totalResults": string;
     albummatches: {
       album: LastFmAlbumMatch[];
@@ -49,7 +52,15 @@ export class LastFmProvider extends BaseProvider {
       `${this.baseUrl}?${queryParams.toString()}`,
     );
 
-    const albumList = data.results?.albummatches?.album;
+    if (data.error || !data.results) {
+      throw new Error(
+        `${this.name} API error: ${data.message ?? "unexpected response"}${
+          data.error ? ` (${data.error})` : ""
+        }`,
+      );
+    }
+
+    const albumList = data.results.albummatches?.album;
     const albums = (Array.isArray(albumList) ? albumList : []).map(
       (album): AlbumArt => ({
         id: `${this.name}-${album.mbid || album.url}`,

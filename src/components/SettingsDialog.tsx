@@ -124,8 +124,9 @@ export const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
           {activeTab === "keys" && (
             <div className="space-y-6">
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Add your own API keys to enable these services. Keys are stored
-                locally in your browser.
+                Add your own API keys to enable these services. Keys are saved
+                in your browser's local storage until you clear site data, and
+                are only sent to the matching provider.
               </p>
 
               <div className="space-y-2">

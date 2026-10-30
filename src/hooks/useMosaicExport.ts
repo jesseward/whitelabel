@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import type { AlbumArt } from "../types";
 import piexif from "piexifjs";
 import Konva from "konva";
+import { upgradeNodesForExport } from "../utils/hiResExport";
 
 const PREVIEW_PIXEL_RATIO = 2; // Lower ratio for faster preview generation
 const EXPORT_PIXEL_RATIO = 3; // Higher ratio for high-quality export
@@ -25,7 +26,7 @@ export const useMosaicExport = ({
     return stageRef.current.toDataURL({ pixelRatio: PREVIEW_PIXEL_RATIO });
   }, [stageRef]);
 
-  const handleExport = useCallback(() => {
+  const handleExport = useCallback(async () => {
     if (!stageRef.current && !enhancedImage) return;
 
     let dataURL = "";
@@ -43,11 +44,20 @@ export const useMosaicExport = ({
         exportFormat = "jpeg";
       }
     } else if (stageRef.current) {
-      dataURL = stageRef.current.toDataURL({
-        pixelRatio: EXPORT_PIXEL_RATIO,
-        mimeType: `image/${format}`,
-        quality: format === "jpeg" ? quality : undefined,
-      });
+      const stage = stageRef.current;
+      const restore = await upgradeNodesForExport(
+        stage.find<Konva.Image>("Image"),
+        albums,
+      );
+      try {
+        dataURL = stage.toDataURL({
+          pixelRatio: EXPORT_PIXEL_RATIO,
+          mimeType: `image/${format}`,
+          quality: format === "jpeg" ? quality : undefined,
+        });
+      } finally {
+        restore();
+      }
     }
 
     let finalDataURL = dataURL;

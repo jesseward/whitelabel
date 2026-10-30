@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useSettingsStore } from "../store/useSettingsStore";
 
-const MODEL_NAME =
+export const MODEL_NAME =
   import.meta.env.VITE_GEMINI_MODEL || "gemini-3.1-flash-image";
 
 export interface AIStyle {
@@ -400,22 +400,93 @@ export const buildEnhancePrompt = (
   return finalPrompt;
 };
 
+interface GeminiResponseLike {
+  candidates?: {
+    finishReason?: string;
+    content?: {
+      parts?: {
+        text?: string;
+        inlineData?: { mimeType: string; data: string };
+      }[];
+    };
+  }[];
+  promptFeedback?: { blockReason?: string };
+}
+
+/**
+ * Finds the generated image in a Gemini response. The image part is not
+ * guaranteed to be first; models may emit a text part before it.
+ */
+export const extractImageDataUrl = (response: GeminiResponseLike): string => {
+  if (response.promptFeedback?.blockReason) {
+    throw new Error(
+      `Gemini blocked the request: ${response.promptFeedback.blockReason}`,
+    );
+  }
+
+  const candidate = response.candidates?.[0];
+  if (!candidate) {
+    throw new Error("No candidates returned from Gemini");
+  }
+
+  const imagePart = candidate.content?.parts?.find((part) => part.inlineData);
+  if (!imagePart?.inlineData) {
+    const reason = candidate.finishReason
+      ? ` (finish reason: ${candidate.finishReason})`
+      : "";
+    throw new Error(
+      `No image data found in response${reason}. The model '${MODEL_NAME}' may not support image-to-image output. Ensure you are using a model that supports image generation/multimodal output.`,
+    );
+  }
+
+  const { mimeType, data } = imagePart.inlineData;
+  return `data:${mimeType};base64,${data}`;
+};
+
+const getGeminiApiKey = (): string =>
+  useSettingsStore.getState().apiKeys.gemini ||
+  import.meta.env.VITE_GEMINI_API_KEY ||
+  "";
+
+/** True when no usable Gemini key is configured and results are simulated. */
+export const isMockMode = (): boolean => {
+  const apiKey = getGeminiApiKey();
+  return !apiKey || apiKey.startsWith("your_");
+};
+
+/** Resolves after `ms`, or rejects with an AbortError if `signal` fires. */
+const abortableDelay = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(new DOMException("Aborted", "AbortError"));
+      },
+      { once: true },
+    );
+  });
+
 export const AIService = {
   enhanceMosaic: async (
     base64Image: string,
     style: AIStyle,
     options?: AIEnhanceOptions,
+    signal?: AbortSignal,
   ): Promise<string> => {
-    const apiKey =
-      useSettingsStore.getState().apiKeys.gemini ||
-      import.meta.env.VITE_GEMINI_API_KEY;
-    const mockMode = !apiKey || apiKey.startsWith("your_");
+    const apiKey = getGeminiApiKey();
+    const mockMode = isMockMode();
 
     const finalPrompt = buildEnhancePrompt(style, options);
 
     if (mockMode) {
       console.log("AI Service: Running in MOCK mode with prompt:", finalPrompt);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await abortableDelay(2000, signal);
       if (style.id.startsWith("mixtape")) {
         return createMockCassette(style.id, options);
       }
@@ -427,32 +498,19 @@ export const AIService = {
 
     const base64Data = base64Image.split(",")[1];
 
-    const result = await model.generateContent([
-      finalPrompt,
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: "image/png",
+    const result = await model.generateContent(
+      [
+        finalPrompt,
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType: "image/png",
+          },
         },
-      },
-    ]);
+      ],
+      { signal },
+    );
 
-    const response = result.response;
-
-    if (!response.candidates || response.candidates.length === 0) {
-      throw new Error("No candidates returned from Gemini");
-    }
-
-    const firstCandidate = response.candidates[0];
-    const firstPart = firstCandidate.content.parts[0];
-
-    if (!firstPart || !firstPart.inlineData) {
-      throw new Error(
-        `No image data found in response. The model '${MODEL_NAME}' may not support image-to-image output. Ensure you are using a model that supports image generation/multimodal output.`,
-      );
-    }
-
-    const { mimeType, data } = firstPart.inlineData;
-    return `data:${mimeType};base64,${data}`;
+    return extractImageDataUrl(result.response);
   },
 };

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { SearchService } from "./searchService";
+import { SearchService, matchesAllWords } from "./searchService";
 
 describe("SearchService", () => {
   describe("parseQuery", () => {
@@ -30,6 +30,37 @@ describe("SearchService", () => {
       const result = SearchService.parseQuery("artist:Autechre something else");
       expect(result.artist).toBe("Autechre");
       expect(result.query).toBe("something else");
+    });
+  });
+
+  describe("searchAll", () => {
+    it("returns no results for a blank or whitespace-only query", async () => {
+      expect(await SearchService.searchAll("")).toEqual([]);
+      expect(await SearchService.searchAll("   ")).toEqual([]);
+    });
+  });
+
+  describe("matchesAllWords", () => {
+    it("ignores quotes and punctuation in the query", () => {
+      expect(matchesAllWords("Some Artist Say Hi", 'Say "Hi"')).toBe(true);
+    });
+
+    it("ignores punctuation in the result", () => {
+      expect(matchesAllWords('EM XINH "SAY HI"', "say hi")).toBe(true);
+    });
+
+    it("requires every word to match", () => {
+      expect(matchesAllWords("Autechre Amber", "autechre tri repetae")).toBe(
+        false,
+      );
+    });
+
+    it("matches non-latin text", () => {
+      expect(matchesAllWords("Sigur Rós Ágætis byrjun", "rós")).toBe(true);
+    });
+
+    it("matches everything when the query has no words", () => {
+      expect(matchesAllWords("Anything", '"" --')).toBe(true);
     });
   });
 });

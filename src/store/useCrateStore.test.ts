@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { get as idbGet } from "idb-keyval";
 import { useCrateStore } from "./useCrateStore";
 
 // Mock idb-keyval
@@ -35,6 +36,7 @@ describe("useCrateStore", () => {
 
     // Mock successful fetch
     (globalThis.fetch as Mock).mockResolvedValue({
+      ok: true,
       blob: () => Promise.resolve(new Blob()),
     });
 
@@ -43,6 +45,28 @@ describe("useCrateStore", () => {
     const state = useCrateStore.getState();
     expect(state.selectedAlbums).toHaveLength(1);
     expect(state.selectedAlbums[0].localUrl).toBe("blob:mock-url");
+  });
+
+  it("should not store a local URL when the image fetch fails", async () => {
+    const mockAlbum = {
+      id: "404",
+      url: "https://example.com/missing.jpg",
+      artist: "Artist",
+      album: "Album",
+      provider: "musicbrainz" as const,
+    };
+
+    (globalThis.fetch as Mock).mockResolvedValue({
+      ok: false,
+      status: 404,
+      blob: () => Promise.resolve(new Blob()),
+    });
+
+    await useCrateStore.getState().addAlbum(mockAlbum);
+
+    const state = useCrateStore.getState();
+    expect(state.selectedAlbums).toHaveLength(1);
+    expect(state.selectedAlbums[0].localUrl).toBeUndefined();
   });
 
   it("should add multiple albums and create local URLs", async () => {
@@ -62,6 +86,7 @@ describe("useCrateStore", () => {
     };
 
     (globalThis.fetch as Mock).mockResolvedValue({
+      ok: true,
       blob: () => Promise.resolve(new Blob()),
     });
 
@@ -83,6 +108,7 @@ describe("useCrateStore", () => {
     };
 
     (globalThis.fetch as Mock).mockResolvedValue({
+      ok: true,
       blob: () => Promise.resolve(new Blob()),
     });
 
@@ -110,6 +136,87 @@ describe("useCrateStore", () => {
     expect(useCrateStore.getState().selectedAlbums).toHaveLength(0);
     expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(
       "blob:to-revoke",
+    );
+  });
+
+  it("should revoke the blob when the album is removed during the fetch", async () => {
+    const mockAlbum = {
+      id: "gone",
+      url: "https://example.com/gone.jpg",
+      artist: "A",
+      album: "B",
+      provider: "itunes" as const,
+    };
+
+    (globalThis.fetch as Mock).mockImplementation(async () => {
+      useCrateStore.getState().removeAlbum("gone");
+      return { ok: true, blob: () => Promise.resolve(new Blob()) };
+    });
+
+    await useCrateStore.getState().addAlbum(mockAlbum);
+
+    expect(useCrateStore.getState().selectedAlbums).toHaveLength(0);
+    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(
+      "blob:mock-url",
+    );
+  });
+
+  it("should throttle image fetches for large batches", async () => {
+    vi.useFakeTimers();
+    try {
+      // The throttle is module-level; let earlier tests' calls age out.
+      await vi.advanceTimersByTimeAsync(1000);
+      const albums = Array.from({ length: 20 }, (_, i) => ({
+        id: `bulk-${i}`,
+        url: `https://example.com/${i}.jpg`,
+        artist: "A",
+        album: `B${i}`,
+        provider: "itunes" as const,
+      }));
+      (globalThis.fetch as Mock).mockResolvedValue({
+        ok: true,
+        blob: () => Promise.resolve(new Blob()),
+      });
+
+      const done = useCrateStore.getState().addAlbums(albums);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(8);
+
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(16);
+
+      await vi.advanceTimersByTimeAsync(1000);
+      await done;
+      expect(globalThis.fetch).toHaveBeenCalledTimes(20);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should only hydrate once when called repeatedly", async () => {
+    (idbGet as Mock).mockResolvedValue([
+      {
+        id: "h1",
+        url: "https://example.com/h1.jpg",
+        artist: "A",
+        album: "B",
+        provider: "itunes" as const,
+      },
+    ]);
+    (globalThis.fetch as Mock).mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(new Blob()),
+    });
+
+    await Promise.all([
+      useCrateStore.getState().hydrate(),
+      useCrateStore.getState().hydrate(),
+    ]);
+
+    expect(idbGet).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(useCrateStore.getState().selectedAlbums[0].localUrl).toBe(
+      "blob:mock-url",
     );
   });
 });
