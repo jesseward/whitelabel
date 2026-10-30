@@ -128,7 +128,13 @@ Open question for the owner: should the mock cassette mode remain (as a demo for
 
 Update after every commit. Format: `[ ] item – status/commit`.
 
-**Phase 1 – correctness:** [ ] 1 [ ] 2 [ ] 3 [ ] 4 [ ] 7 [ ] 12
+**Phase 1 – correctness (code done, awaiting owner's test run):**
+- [x] 1 Gemini image part lookup – 55935f3
+- [x] 2 failed image fetch no longer cached – 7afe5de
+- [x] 3 Last.fm error bodies – 0de0e95 (shared commit with 4)
+- [x] 4 MusicBrainz phrase escaping – 0de0e95
+- [x] 7 blank/whitespace search – e4dfbfd
+- [x] 12 iTunes errors propagate – e8afa12
 **Phase 2 – honest behaviour:** [ ] 5 [ ] 11 [ ] 22 [ ] 23 [ ] 28
 **Phase 3 – hardening:** [ ] 8 [ ] 9 [ ] 10 [ ] 13 [ ] 15 [ ] 16
 **Phase 4 – features:** [ ] 6 [ ] 14
@@ -137,3 +143,4 @@ Update after every commit. Format: `[ ] item – status/commit`.
 
 Session log:
 - 2026-10-30: review done, plan written, working agreements agreed. No code changed yet.
+- 2026-10-30: Phase 1 implemented (5 commits on `improvements`). Node/npm are NOT installed on this machine, so nothing has been linted, type-checked or tested; owner to run `npm ci && npm run lint && npm test -- --run && npm run build`. Existing store test mocks were updated to include `ok: true`. Not yet done: Phase 2.
