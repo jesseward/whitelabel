@@ -3,7 +3,7 @@
 > [!TIP]
 > Application is deployed to https://www.jesseward.com/whitelabel . If you wish to use Discogs or LastFM API you will need to supply your own keys. The application is a static page hosted on GitHub pages. Keys are saved in your browser's localStorage (they persist until you clear site data) and are only sent to the provider's own API when a request is made. There is no WhiteLabel server.
 
-WhiteLabel is a client-side web application allowing you to create mosciacs from album art. You can optionally apply effects using Gemini's Nano Banana model, for example ..
+WhiteLabel is a client-side web application allowing you to create mosaics from album art. You can optionally apply effects using Gemini's Nano Banana model, for example ..
 
 ![Nightmares On Wax](docs/in-a-space.jpeg)
 
@@ -13,7 +13,7 @@ or
 
 ## Features
 
-- **Multi-Provider Search**: Fetch album alrt from sources : Last.fm, Discogs, MusicBrainz, and Apple iTunes.
+- **Multi-Provider Search**: Fetch album art from sources : Last.fm, Discogs, MusicBrainz, and Apple iTunes.
 - **Batch Import**: Upload text files to automatically populate your crate with random selections from a playlist.
 - **Client-Side Configuration**: "Bring Your Own Key" allows users to input API keys directly in the UI, enabling purely static hosting.
 - **AI Lab**: Style transfers and custom typography powered by Gemini Nano Banana.
@@ -24,6 +24,8 @@ or
 - [Technical Architecture](docs/ARCHITECTURE.md) - Codebase structure, state management, and API design.
 
 ## Development Setup
+
+Requires Node 20 (see `.nvmrc`; `nvm use` picks it up).
 
 The project includes a `Makefile` to simplify common development tasks.
 
@@ -48,6 +50,20 @@ make build
 # Clean build artifacts
 make clean
 ```
+
+### Environment variables (local development only)
+
+Instead of typing keys into the Settings dialog you can put them in a `.env.local` file (git-ignored):
+
+```
+VITE_LASTFM_API_KEY=...
+VITE_DISCOGS_TOKEN=...
+VITE_GEMINI_API_KEY=...
+VITE_GEMINI_MODEL=...   # optional, must be an image-output model
+```
+
+> [!WARNING]
+> Vite inlines every `VITE_*` variable into the built JavaScript, so anything set at build time is readable by anyone who loads the page. Never set these for a public deployment (the GitHub Pages workflow does not); use the Settings dialog instead.
 
 ## How
 
