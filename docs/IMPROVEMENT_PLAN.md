@@ -11,22 +11,22 @@ Priority: **P1** = real bug / user-visible, **P2** = robustness / correctness ri
 
 1. **Gemini response parsing takes `parts[0]` only** (`aiService.ts`, `enhanceMosaic`).
    Image models often return a text part before the `inlineData` part. This throws "No image data found" even when an image is present.
-   *Fix:* `parts.find(p => p.inlineData)`; also handle `promptFeedback` / `finishReason` blocks with a clear message.
+   _Fix:_ `parts.find(p => p.inlineData)`; also handle `promptFeedback` / `finishReason` blocks with a clear message.
 
 2. **`fetchImageBlob` never checks `res.ok`** (`useCrateStore.ts`).
    A 404/5xx from wsrv.nl (common for Cover Art Archive misses) is turned into a blob URL and stored as `localUrl`. `MosaicStage` prefers `localUrl`, so the tile renders blank instead of falling back to the remote URL.
-   *Fix:* throw/return `null` on `!res.ok` or non-`image/*` content type.
+   _Fix:_ throw/return `null` on `!res.ok` or non-`image/*` content type.
 
 3. **Last.fm error responses crash the provider** (`lastfmProvider.ts`).
    Last.fm returns HTTP 200 with `{error, message}` for bad keys or rate limits. `data.results["opensearch:totalResults"]` then throws a `TypeError` with a misleading message.
-   *Fix:* check `data.error` and throw a descriptive error; guard `data.results`.
+   _Fix:_ check `data.error` and throw a descriptive error; guard `data.results`.
 
 4. **MusicBrainz Lucene query is not escaped** (`musicbrainzProvider.ts`).
    User input containing `"`, `\`, `:` or similar breaks the query or returns a 400. Example: `album:"foo"bar`.
-   *Fix:* escape Lucene special characters in `artist`, `album` and `query`.
+   _Fix:_ escape Lucene special characters in `artist`, `album` and `query`.
 
 5. **README claims keys are "stored in your browser session only"**, but `useSettingsStore` uses `persist` (localStorage), so keys persist indefinitely.
-   *Fix:* either correct the docs, or add a "remember keys" toggle that uses `sessionStorage` by default (`partialize` plus a custom `storage`).
+   _Fix:_ either correct the docs, or add a "remember keys" toggle that uses `sessionStorage` by default (`partialize` plus a custom `storage`).
 
 ---
 
@@ -34,23 +34,23 @@ Priority: **P1** = real bug / user-visible, **P2** = robustness / correctness ri
 
 6. **Pagination is dead code.** `page` and `totalResults` flow through every provider, but `App` always requests page 1 and ignores `totalResults`. Either add "load more" with `useInfiniteQuery`, or drop the plumbing. (Recommend implementing it; the data is already there.)
 
-7. **Whitespace-only search** passes `enabled: searchQuery.length > 0`, and then every result passes the word filter. *Fix:* trim in `onSearch` and in `searchAll`.
+7. **Whitespace-only search** passes `enabled: searchQuery.length > 0`, and then every result passes the word filter. _Fix:_ trim in `onSearch` and in `searchAll`.
 
-8. **Unbounded blob-fetch concurrency on hydrate/`addAlbums`.** A crate with 100 albums fires 100 simultaneous requests at wsrv.nl. *Fix:* run them through a small `p-limit`/`pThrottle` pool (the dependency is already used).
+8. **Unbounded blob-fetch concurrency on hydrate/`addAlbums`.** A crate with 100 albums fires 100 simultaneous requests at wsrv.nl. _Fix:_ run them through a small `p-limit`/`pThrottle` pool (the dependency is already used).
 
-9. **Blob URL leaks under StrictMode / double hydrate.** `hydrate()` runs twice in dev. The second run overwrites `localUrl`s created by the first without revoking them. Also, the hydrate merge step never revokes blobs for albums removed during hydration. *Fix:* make `hydrate` idempotent (guard with an in-flight promise) and revoke on discard.
+9. **Blob URL leaks under StrictMode / double hydrate.** `hydrate()` runs twice in dev. The second run overwrites `localUrl`s created by the first without revoking them. Also, the hydrate merge step never revokes blobs for albums removed during hydration. _Fix:_ make `hydrate` idempotent (guard with an in-flight promise) and revoke on discard.
 
-10. **Mixtape generation fires on every mount, including StrictMode double-invoke, with no abort.** `MixtapePreview`'s `useEffect` guards only the state update. In dev this issues two paid Gemini calls. It also re-runs if any prop identity changes. *Fix:* generate on explicit user action or key the request on a stable value; add `AbortController` (the SDK accepts `signal` in request options) or a request-id guard; use React Query's `useMutation`.
+10. **Mixtape generation fires on every mount, including StrictMode double-invoke, with no abort.** `MixtapePreview`'s `useEffect` guards only the state update. In dev this issues two paid Gemini calls. It also re-runs if any prop identity changes. _Fix:_ generate on explicit user action or key the request on a stable value; add `AbortController` (the SDK accepts `signal` in request options) or a request-id guard; use React Query's `useMutation`.
 
-11. **Silent mock mode in production.** With no Gemini key, `enhanceMosaic` returns a canvas-drawn fake cassette after a 2s delay (mixtape flow only; `AIPanel` blocks without a key). Users may think the AI worked. *Fix:* gate mock mode on `import.meta.env.DEV` or an explicit flag, and show a "Preview (no API key)" banner. Alternatively require a key in `MixtapeForm` like `AIPanel` does.
+11. **Silent mock mode in production.** With no Gemini key, `enhanceMosaic` returns a canvas-drawn fake cassette after a 2s delay (mixtape flow only; `AIPanel` blocks without a key). Users may think the AI worked. _Fix:_ gate mock mode on `import.meta.env.DEV` or an explicit flag, and show a "Preview (no API key)" banner. Alternatively require a key in `MixtapeForm` like `AIPanel` does.
 
-12. **iTunes provider swallows all errors** and returns an empty result, unlike the other providers. Failures then look like "no results", and `searchAll`'s `allSettled` error logging never fires. *Fix:* let it throw. Surface per-provider errors in the UI (for example a "2 of 4 providers failed" notice).
+12. **iTunes provider swallows all errors** and returns an empty result, unlike the other providers. Failures then look like "no results", and `searchAll`'s `allSettled` error logging never fires. _Fix:_ let it throw. Surface per-provider errors in the UI (for example a "2 of 4 providers failed" notice).
 
 13. **MusicBrainz / Cover Art Archive results often have no art.** The URL `…/front-500` is built blindly, so many results are broken images. Options: filter with a HEAD/`image` preload, use the `cover-art-archive.front` flag from the search response when present, or lazily drop tiles on `onError`.
 
-14. **EXIF injection with non-ASCII text.** Artist and album names with non-Latin characters in an `"ASCII\0\0\0"` `UserComment` can make `piexif.dump` throw or produce garbage. The `try/catch` swallows it, so metadata is silently omitted. *Fix:* use the `UNICODE\0` prefix with UTF-16 encoding or sanitize, and tell the user when metadata could not be written. Also cap the length: a 100-album crate yields a huge string.
+14. **EXIF injection with non-ASCII text.** Artist and album names with non-Latin characters in an `"ASCII\0\0\0"` `UserComment` can make `piexif.dump` throw or produce garbage. The `try/catch` swallows it, so metadata is silently omitted. _Fix:_ use the `UNICODE\0` prefix with UTF-16 encoding or sanitize, and tell the user when metadata could not be written. Also cap the length: a 100-album crate yields a huge string.
 
-15. **`getProxiedUrl` crop vs export resolution.** Blobs are fetched at `medium` (600×600), but export uses `pixelRatio: 3` on an up-to-800px stage. Cells larger than 200px at 3× are upscaled from a 600px source for 2–3 column layouts, so exports are soft. *Fix:* fetch `large` for export, or re-render with originals at export time.
+15. **`getProxiedUrl` crop vs export resolution.** Blobs are fetched at `medium` (600×600), but export uses `pixelRatio: 3` on an up-to-800px stage. Cells larger than 200px at 3× are upscaled from a 600px source for 2–3 column layouts, so exports are soft. _Fix:_ fetch `large` for export, or re-render with originals at export time.
 
 16. **Hard dependency on wsrv.nl** (third-party, no SLA) for all images and export. Add a documented fallback, for example try the direct URL with `crossOrigin="anonymous"` first (iTunes, CAA and Last.fm usually send CORS headers) and fall back to the proxy.
 
@@ -102,14 +102,14 @@ Priority: **P1** = real bug / user-visible, **P2** = robustness / correctness ri
 
 ## Suggested execution order
 
-| Phase | Items | Notes |
-|---|---|---|
-| 1. Quick correctness wins | 1, 2, 3, 4, 7, 12 | Small, isolated, each testable (add tests per item 26) |
-| 2. Honest behaviour | 5, 11, 22, 23, 28 | Mostly doc/gating changes |
-| 3. Store/network hardening | 8, 9, 10, 13, 15, 16 | Touches `useCrateStore`, `MixtapePreview`, image pipeline |
-| 4. Features already half-built | 6, 14 | Pagination UI; EXIF encoding |
-| 5. Refactor | 17–21, 25 | Do after phases 1–3 so the new tests protect the refactor |
-| 6. Polish | 24, 26, 27 | A11y, extra tests, CI |
+| Phase                          | Items                | Notes                                                     |
+| ------------------------------ | -------------------- | --------------------------------------------------------- |
+| 1. Quick correctness wins      | 1, 2, 3, 4, 7, 12    | Small, isolated, each testable (add tests per item 26)    |
+| 2. Honest behaviour            | 5, 11, 22, 23, 28    | Mostly doc/gating changes                                 |
+| 3. Store/network hardening     | 8, 9, 10, 13, 15, 16 | Touches `useCrateStore`, `MixtapePreview`, image pipeline |
+| 4. Features already half-built | 6, 14                | Pagination UI; EXIF encoding                              |
+| 5. Refactor                    | 17–21, 25            | Do after phases 1–3 so the new tests protect the refactor |
+| 6. Polish                      | 24, 26, 27           | A11y, extra tests, CI                                     |
 
 Open question for the owner: should the mock cassette mode remain (as a demo for keyless users), or be dev-only? That decides how item 11 is fixed.
 
@@ -129,6 +129,7 @@ Open question for the owner: should the mock cassette mode remain (as a demo for
 Update after every commit. Format: `[ ] item – status/commit`.
 
 **Phase 1 – correctness (COMPLETED, owner browser-verified 2026-10-30):**
+
 - [x] 1 Gemini image part lookup – 55935f3
 - [x] 2 failed image fetch no longer cached – 7afe5de
 - [x] 3 Last.fm error bodies – 0de0e95 (shared commit with 4)
@@ -136,19 +137,20 @@ Update after every commit. Format: `[ ] item – status/commit`.
 - [x] 7 blank/whitespace search – e4dfbfd
 - [x] 12 iTunes errors propagate – e8afa12
 - [x] 29 (found in owner testing) relevance filter dropped results for queries containing quotes/punctuation – see commit below
-**Phase 2 – honest behaviour (code done, awaiting owner's browser check):**
+      **Phase 2 – honest behaviour (code done, awaiting owner's browser check):**
 - [x] 5 key-storage docs corrected (README, HOWTO, Settings dialog) – 0499d2c (chose docs fix, not session-only toggle)
 - [x] 11 mock mode kept, "preview" banner in MixtapePreview – 01e6ca7
 - [~] 22 error text uses MODEL_NAME – 01e6ca7; default model id `gemini-3.1-flash-image` is UNVERIFIED, owner to confirm it is valid
-- [x] 23 VITE_* warning in README – 1ea519a
+- [x] 23 VITE\_\* warning in README – 1ea519a
 - [x] 28 README typos – 1ea519a; ARCHITECTURE.md refreshed – see latest commit
 - [x] `.nvmrc` (20) – 1ea519a. CI still hard-codes node 20; switching to `node-version-file` is left to item 27
-**Phase 3 – hardening:** [ ] 8 [ ] 9 [ ] 10 [ ] 13 [ ] 15 [ ] 16
-**Phase 4 – features:** [ ] 6 [ ] 14
-**Phase 5 – refactor:** [ ] 17 [ ] 18 [ ] 19 [ ] 20 [ ] 21 [ ] 25
-**Phase 6 – polish:** [ ] 24 [ ] 26 [ ] 27
+      **Phase 3 – hardening:** [ ] 8 [ ] 9 [ ] 10 [ ] 13 [ ] 15 [ ] 16
+      **Phase 4 – features:** [ ] 6 [ ] 14
+      **Phase 5 – refactor:** [ ] 17 [ ] 18 [ ] 19 [ ] 20 [ ] 21 [ ] 25
+      **Phase 6 – polish:** [ ] 24 [ ] 26 [ ] 27
 
 Session log:
+
 - 2026-10-30: review done, plan written, working agreements agreed. No code changed yet.
 - 2026-10-30: Phase 1 implemented (5 commits on `improvements`). Node/npm are NOT installed on this machine, so nothing has been linted, type-checked or tested; owner to run `npm ci && npm run lint && npm test -- --run && npm run build`. Existing store test mocks were updated to include `ok: true`. Not yet done: Phase 2.
 - 2026-10-30: Node 20.20.2 installed via nvm (`. ~/.nvm/nvm.sh` before npm in Claude's shell). Phase 1 verified: lint clean, 41/41 tests pass, `tsc -b` + build succeed. Browser click-check still owner's. Next: Phase 2.
