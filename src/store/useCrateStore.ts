@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import pThrottle from "p-throttle";
 import type { AlbumArt } from "../types";
-import { getProxiedUrl } from "../utils/imageProxy";
+import { fetchImageBlobData } from "../utils/imageProxy";
 import { CrateStorageService } from "../services/crateStorageService";
 
 interface CrateState {
@@ -22,11 +22,7 @@ const throttleImageFetch = pThrottle({ limit: 8, interval: 1000 });
 const fetchImageBlob = throttleImageFetch(
   async (url: string): Promise<string | null> => {
     try {
-      const res = await fetch(getProxiedUrl(url, "medium"));
-      if (!res.ok) {
-        throw new Error(`Image request failed with status ${res.status}`);
-      }
-      const blob = await res.blob();
+      const blob = await fetchImageBlobData(url, "medium");
       return URL.createObjectURL(blob);
     } catch (error) {
       console.warn(`Failed to cache image for ${url}:`, error);

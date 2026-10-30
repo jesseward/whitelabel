@@ -144,7 +144,7 @@ Update after every commit. Format: `[ ] item – status/commit`.
 - [x] 23 VITE\_\* warning in README – 1ea519a
 - [x] 28 README typos – 1ea519a; ARCHITECTURE.md refreshed – see latest commit
 - [x] `.nvmrc` (20) – 1ea519a. CI still hard-codes node 20; switching to `node-version-file` is left to item 27
-      **Phase 3 – hardening:** [x] 8 throttled blob fetches (8/sec via p-throttle) – see commit [x] 9 idempotent hydrate + blob revoke on discard/replace – same commit [x] 10 abort + deferred start for mixtape generation – see commit [ ] 13 [ ] 15 [ ] 16
+      **Phase 3 – hardening:** [x] 8 throttled blob fetches (8/sec via p-throttle) – see commit [x] 9 idempotent hydrate + blob revoke on discard/replace – same commit [x] 10 abort + deferred start for mixtape generation – see commit [ ] 13 [ ] 15 [x] 16 direct fetch with proxy fallback (`fetchImageBlobData`) – see commit
       **Phase 4 – features:** [ ] 6 [ ] 14
       **Phase 5 – refactor:** [ ] 17 [ ] 18 [ ] 19 [ ] 20 [ ] 21 [ ] 25
       **Phase 6 – polish:** [ ] 24 [ ] 26 [ ] 27
