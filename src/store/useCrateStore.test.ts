@@ -35,6 +35,7 @@ describe("useCrateStore", () => {
 
     // Mock successful fetch
     (globalThis.fetch as Mock).mockResolvedValue({
+      ok: true,
       blob: () => Promise.resolve(new Blob()),
     });
 
@@ -43,6 +44,28 @@ describe("useCrateStore", () => {
     const state = useCrateStore.getState();
     expect(state.selectedAlbums).toHaveLength(1);
     expect(state.selectedAlbums[0].localUrl).toBe("blob:mock-url");
+  });
+
+  it("should not store a local URL when the image fetch fails", async () => {
+    const mockAlbum = {
+      id: "404",
+      url: "https://example.com/missing.jpg",
+      artist: "Artist",
+      album: "Album",
+      provider: "musicbrainz" as const,
+    };
+
+    (globalThis.fetch as Mock).mockResolvedValue({
+      ok: false,
+      status: 404,
+      blob: () => Promise.resolve(new Blob()),
+    });
+
+    await useCrateStore.getState().addAlbum(mockAlbum);
+
+    const state = useCrateStore.getState();
+    expect(state.selectedAlbums).toHaveLength(1);
+    expect(state.selectedAlbums[0].localUrl).toBeUndefined();
   });
 
   it("should add multiple albums and create local URLs", async () => {
@@ -62,6 +85,7 @@ describe("useCrateStore", () => {
     };
 
     (globalThis.fetch as Mock).mockResolvedValue({
+      ok: true,
       blob: () => Promise.resolve(new Blob()),
     });
 
@@ -83,6 +107,7 @@ describe("useCrateStore", () => {
     };
 
     (globalThis.fetch as Mock).mockResolvedValue({
+      ok: true,
       blob: () => Promise.resolve(new Blob()),
     });
 

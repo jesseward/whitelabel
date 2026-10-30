@@ -18,6 +18,9 @@ interface CrateState {
 const fetchImageBlob = async (url: string): Promise<string | null> => {
   try {
     const res = await fetch(getProxiedUrl(url, "medium"));
+    if (!res.ok) {
+      throw new Error(`Image request failed with status ${res.status}`);
+    }
     const blob = await res.blob();
     return URL.createObjectURL(blob);
   } catch (error) {
