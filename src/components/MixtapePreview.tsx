@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { AIService, type AIStyle } from "../services/aiService";
+import {
+  AIService,
+  isMockMode,
+  MODEL_NAME,
+  type AIStyle,
+} from "../services/aiService";
 import piexif from "piexifjs";
 
 interface MixtapePreviewProps {
@@ -36,6 +41,7 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMock, setIsMock] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -43,6 +49,7 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
     const generateImage = async () => {
       setIsLoading(true);
       setError(null);
+      setIsMock(isMockMode());
       try {
         const placeholder = createPlaceholder(600, 400);
         const result = await AIService.enhanceMosaic(placeholder, style, {
@@ -57,7 +64,7 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
         console.error("Failed to generate mixtape cover:", err);
         if (isMounted) {
           setError(
-            "Failed to generate mixtape cover. This feature requires access to the Gemini image-to-image model (gemini-3.1-flash-image). Please verify your API key and model permissions in Settings.",
+            `Failed to generate mixtape cover. This feature requires access to the Gemini image-to-image model (${MODEL_NAME}). Please verify your API key and model permissions in Settings.`,
           );
         }
       } finally {
@@ -142,6 +149,16 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
             />
           )}
         </div>
+        {imageUrl && !isLoading && isMock && (
+          <p
+            role="status"
+            className="w-full text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3"
+          >
+            Preview only: no Gemini API key is configured, so this is a
+            simplified placeholder, not an AI-generated cover. Add a key in
+            Settings to generate the real thing.
+          </p>
+        )}
       </div>
 
       {imageUrl && !isLoading && (

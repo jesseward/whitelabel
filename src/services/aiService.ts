@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useSettingsStore } from "../store/useSettingsStore";
 
-const MODEL_NAME =
+export const MODEL_NAME =
   import.meta.env.VITE_GEMINI_MODEL || "gemini-3.1-flash-image";
 
 export interface AIStyle {
@@ -443,16 +443,25 @@ export const extractImageDataUrl = (response: GeminiResponseLike): string => {
   return `data:${mimeType};base64,${data}`;
 };
 
+const getGeminiApiKey = (): string =>
+  useSettingsStore.getState().apiKeys.gemini ||
+  import.meta.env.VITE_GEMINI_API_KEY ||
+  "";
+
+/** True when no usable Gemini key is configured and results are simulated. */
+export const isMockMode = (): boolean => {
+  const apiKey = getGeminiApiKey();
+  return !apiKey || apiKey.startsWith("your_");
+};
+
 export const AIService = {
   enhanceMosaic: async (
     base64Image: string,
     style: AIStyle,
     options?: AIEnhanceOptions,
   ): Promise<string> => {
-    const apiKey =
-      useSettingsStore.getState().apiKeys.gemini ||
-      import.meta.env.VITE_GEMINI_API_KEY;
-    const mockMode = !apiKey || apiKey.startsWith("your_");
+    const apiKey = getGeminiApiKey();
+    const mockMode = isMockMode();
 
     const finalPrompt = buildEnhancePrompt(style, options);
 

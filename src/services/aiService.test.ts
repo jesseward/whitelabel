@@ -3,6 +3,7 @@ import {
   AIService,
   buildEnhancePrompt,
   extractImageDataUrl,
+  isMockMode,
   AI_STYLES,
   FONT_OPTIONS,
   LAYOUT_OPTIONS,
@@ -176,5 +177,29 @@ describe("extractImageDataUrl", () => {
       ],
     };
     expect(() => extractImageDataUrl(res)).toThrow("IMAGE_SAFETY");
+  });
+});
+
+describe("isMockMode", () => {
+  const setGeminiKey = (gemini: string) =>
+    useSettingsStore.setState({
+      apiKeys: { lastfm: "", discogs: "", gemini },
+    });
+
+  afterEach(() => setGeminiKey(""));
+
+  it("is true without a key", () => {
+    setGeminiKey("");
+    expect(isMockMode()).toBe(true);
+  });
+
+  it("is true for placeholder keys", () => {
+    setGeminiKey("your_api_key_here");
+    expect(isMockMode()).toBe(true);
+  });
+
+  it("is false with a real-looking key", () => {
+    setGeminiKey("AIzaSyExample");
+    expect(isMockMode()).toBe(false);
   });
 });
