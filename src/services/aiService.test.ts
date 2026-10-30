@@ -140,6 +140,22 @@ describe("AIService", () => {
       expect(result).toBe("data:image/png;base64,mocked_cassette");
       expect(result).not.toBe(inputImage);
     });
+
+    it("should reject with an AbortError when aborted during the mock delay", async () => {
+      const controller = new AbortController();
+      const promise = AIService.enhanceMosaic(
+        "data:image/png;base64,x",
+        vintageStyle,
+        undefined,
+        controller.signal,
+      );
+      const assertion = expect(promise).rejects.toMatchObject({
+        name: "AbortError",
+      });
+
+      controller.abort();
+      await assertion;
+    });
   });
 });
 

@@ -454,11 +454,30 @@ export const isMockMode = (): boolean => {
   return !apiKey || apiKey.startsWith("your_");
 };
 
+/** Resolves after `ms`, or rejects with an AbortError if `signal` fires. */
+const abortableDelay = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(new DOMException("Aborted", "AbortError"));
+      },
+      { once: true },
+    );
+  });
+
 export const AIService = {
   enhanceMosaic: async (
     base64Image: string,
     style: AIStyle,
     options?: AIEnhanceOptions,
+    signal?: AbortSignal,
   ): Promise<string> => {
     const apiKey = getGeminiApiKey();
     const mockMode = isMockMode();
@@ -467,7 +486,7 @@ export const AIService = {
 
     if (mockMode) {
       console.log("AI Service: Running in MOCK mode with prompt:", finalPrompt);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await abortableDelay(2000, signal);
       if (style.id.startsWith("mixtape")) {
         return createMockCassette(style.id, options);
       }
@@ -479,15 +498,18 @@ export const AIService = {
 
     const base64Data = base64Image.split(",")[1];
 
-    const result = await model.generateContent([
-      finalPrompt,
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: "image/png",
+    const result = await model.generateContent(
+      [
+        finalPrompt,
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType: "image/png",
+          },
         },
-      },
-    ]);
+      ],
+      { signal },
+    );
 
     return extractImageDataUrl(result.response);
   },

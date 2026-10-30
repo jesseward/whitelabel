@@ -44,7 +44,7 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
   const [isMock, setIsMock] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    const controller = new AbortController();
 
     const generateImage = async () => {
       setIsLoading(true);
@@ -52,32 +52,39 @@ export const MixtapePreview: React.FC<MixtapePreviewProps> = ({
       setIsMock(isMockMode());
       try {
         const placeholder = createPlaceholder(600, 400);
-        const result = await AIService.enhanceMosaic(placeholder, style, {
-          title,
-          dj: dj || undefined,
-          extra: extra || undefined,
-        });
-        if (isMounted) {
+        const result = await AIService.enhanceMosaic(
+          placeholder,
+          style,
+          {
+            title,
+            dj: dj || undefined,
+            extra: extra || undefined,
+          },
+          controller.signal,
+        );
+        if (!controller.signal.aborted) {
           setImageUrl(result);
         }
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error("Failed to generate mixtape cover:", err);
-        if (isMounted) {
-          setError(
-            `Failed to generate mixtape cover. This feature requires access to the Gemini image-to-image model (${MODEL_NAME}). Please verify your API key and model permissions in Settings.`,
-          );
-        }
+        setError(
+          `Failed to generate mixtape cover. This feature requires access to the Gemini image-to-image model (${MODEL_NAME}). Please verify your API key and model permissions in Settings.`,
+        );
       } finally {
-        if (isMounted) {
+        if (!controller.signal.aborted) {
           setIsLoading(false);
         }
       }
     };
 
-    generateImage();
+    // Defer one tick: StrictMode mounts, cleans up and re-mounts synchronously,
+    // so the first (throwaway) run never reaches the paid API.
+    const timer = setTimeout(generateImage, 0);
 
     return () => {
-      isMounted = false;
+      clearTimeout(timer);
+      controller.abort();
     };
   }, [title, dj, extra, style]);
 
